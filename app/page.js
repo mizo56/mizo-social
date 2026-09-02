@@ -6,102 +6,101 @@ import {
   Search,
   Bell,
   MessageCircle,
-  Video,
   Users,
+  User,
+  Settings,
+  LogOut,
   Heart,
   MessageSquare,
   Share2,
-  Image as ImageIcon,
-  Smile,
   MoreHorizontal,
+  Image as ImageIcon,
+  Video,
+  Send,
   UserPlus,
-  Play,
-  Compass,
+  Check,
   Menu,
-  LogOut,
-  User,
+  X,
   Lock,
   Mail,
-  X,
+  AtSign,
+  Camera,
+  Sparkles,
+  ShieldCheck,
 } from "lucide-react";
 
 import { createClient } from "../lib/supabase-browser";
 
 const supabase = createClient();
 
-const stories = [
-  { name: "أنت", emoji: "➕" },
-  { name: "Kanao", emoji: "🌸" },
-  { name: "Mizo", emoji: "🔥" },
-  { name: "Sasuke", emoji: "⚡" },
-  { name: "Marin", emoji: "💜" },
-  { name: "Tanjiro", emoji: "⚔️" },
-];
+/* =========================================
+   بيانات تجريبية للواجهة
+========================================= */
 
-const suggestedUsers = [
-  { name: "Kanao Tsuyuri", username: "@kanao", emoji: "🌸" },
-  { name: "Marin Kitagawa", username: "@marin", emoji: "💜" },
-  { name: "Mizo", username: "@mizo", emoji: "🔥" },
-];
-
-const initialPosts = [
+const demoStories = [
   {
-    id: "demo-1",
+    id: 1,
     name: "Mizo",
-    username: "@mizo",
-    avatar: "M",
-    time: "منذ 10 دقائق",
-    text:
-      "مرحبًا بكم في Mizo Social ❤️\nهنا سنشارك المنشورات والصور والفيديوهات ونتواصل مع بعضنا.",
-    image:
-      "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1200&q=80",
-    likes: 128,
-    comments: 24,
+    image: "https://i.pravatar.cc/300?img=12",
   },
   {
-    id: "demo-2",
-    name: "Kanao Tsuyuri",
-    username: "@kanao",
-    avatar: "🌸",
-    time: "منذ ساعة",
-    text: "يوم جميل جدًا ✨",
-    image:
-      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
-    likes: 89,
-    comments: 12,
+    id: 2,
+    name: "Kanao",
+    image: "https://i.pravatar.cc/300?img=47",
   },
   {
-    id: "demo-3",
-    name: "Mizo Videos",
-    username: "@mizovideos",
-    avatar: "▶️",
-    time: "منذ ساعتين",
-    text: "شاهدوا الفيديو الجديد 🎬🔥",
-    video:
-      "https://cdn.coverr.co/videos/coverr-a-woman-walking-in-the-city-1573/1080p.mp4",
-    likes: 241,
-    comments: 36,
+    id: 3,
+    name: "Sakura",
+    image: "https://i.pravatar.cc/300?img=32",
+  },
+  {
+    id: 4,
+    name: "Yuki",
+    image: "https://i.pravatar.cc/300?img=44",
+  },
+  {
+    id: 5,
+    name: "Mariam",
+    image: "https://i.pravatar.cc/300?img=25",
   },
 ];
 
-function formatTime(date) {
-  if (!date) return "الآن";
+const demoSuggestions = [
+  {
+    id: 1,
+    name: "Kanao Tsuyuri",
+    username: "kanao",
+    image: "https://i.pravatar.cc/150?img=47",
+  },
+  {
+    id: 2,
+    name: "Mizo",
+    username: "mizo",
+    image: "https://i.pravatar.cc/150?img=12",
+  },
+  {
+    id: 3,
+    name: "Sakura",
+    username: "sakura",
+    image: "https://i.pravatar.cc/150?img=32",
+  },
+  {
+    id: 4,
+    name: "Yuki",
+    username: "yuki",
+    image: "https://i.pravatar.cc/150?img=44",
+  },
+];
 
-  const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-
-  if (diff < 60) return "الآن";
-
-  const minutes = Math.floor(diff / 60);
-  if (minutes < 60) return `منذ ${minutes} دقيقة`;
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `منذ ${hours} ساعة`;
-
-  const days = Math.floor(hours / 24);
-  return `منذ ${days} يوم`;
-}
+/* =========================================
+   الصفحة الرئيسية
+========================================= */
 
 export default function HomePage() {
+  /* ---------------------------------------
+     Auth
+  --------------------------------------- */
+
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
 
@@ -116,58 +115,128 @@ export default function HomePage() {
   const [displayName, setDisplayName] = useState("");
 
   const [authMessage, setAuthMessage] = useState("");
-  const [authError, setAuthError] = useState("");
+  const [authSuccess, setAuthSuccess] = useState(false);
 
-  const [posts, setPosts] = useState(initialPosts);
-  const [likedPosts, setLikedPosts] = useState([]);
+  /* ---------------------------------------
+     App
+  --------------------------------------- */
 
-  const [search, setSearch] = useState("");
+  const [posts, setPosts] = useState([]);
   const [postText, setPostText] = useState("");
 
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showMessages, setShowMessages] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
+  const [search, setSearch] = useState("");
 
-  const [commentsOpen, setCommentsOpen] = useState(null);
-  const [commentText, setCommentText] = useState("");
+  const [likedPosts, setLikedPosts] = useState({});
+  const [commentText, setCommentText] = useState({});
   const [comments, setComments] = useState({});
+
+  const [openMenu, setOpenMenu] = useState(null);
+  const [mobileMenu, setMobileMenu] = useState(false);
+
+  /* =========================================
+     فحص تسجيل الدخول
+  ========================================= */
 
   useEffect(() => {
     let mounted = true;
 
-    async function loadUser() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+    async function initializeAuth() {
+      try {
+        /*
+         * إذا فتح المستخدم:
+         *
+         * /?logout=1
+         *
+         * سيتم حذف الجلسة وإظهار شاشة الدخول.
+         */
 
-      if (!mounted) return;
+        if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
 
-      if (session?.user) {
-        setUser(session.user);
-        await loadProfile(session.user);
-        await loadPosts();
+          if (params.get("logout") === "1") {
+            await supabase.auth.signOut({ scope: "local" });
+
+            if (mounted) {
+              setUser(null);
+              setProfile(null);
+              setLoading(false);
+            }
+
+            window.history.replaceState({}, "", "/");
+            return;
+          }
+        }
+
+        /*
+         * getUser يتحقق من المستخدم الحالي
+         * بدل الاعتماد فقط على البيانات المخزنة.
+         */
+
+        const { data, error } = await supabase.auth.getUser();
+
+        if (!mounted) return;
+
+        if (error || !data?.user) {
+          setUser(null);
+          setProfile(null);
+          setLoading(false);
+          return;
+        }
+
+        setUser(data.user);
+
+        await loadProfile(data.user);
+        await loadPosts(data.user);
+
+        if (mounted) {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+
+        if (mounted) {
+          setUser(null);
+          setProfile(null);
+          setLoading(false);
+        }
       }
-
-      setLoading(false);
     }
 
-    loadUser();
+    initializeAuth();
+
+    /*
+     * مراقبة تسجيل الدخول والخروج
+     */
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
 
-      if (session?.user) {
-        setUser(session.user);
-        await loadProfile(session.user);
-        await loadPosts();
-      } else {
+      if (
+        event === "SIGNED_OUT" ||
+        !session?.user
+      ) {
         setUser(null);
         setProfile(null);
+        setPosts([]);
+        setLoading(false);
+        return;
       }
 
-      setLoading(false);
+      if (
+        event === "SIGNED_IN" ||
+        event === "TOKEN_REFRESHED" ||
+        event === "INITIAL_SESSION" ||
+        event === "USER_UPDATED"
+      ) {
+        setUser(session.user);
+
+        await loadProfile(session.user);
+        await loadPosts(session.user);
+
+        setLoading(false);
+      }
     });
 
     return () => {
@@ -176,127 +245,157 @@ export default function HomePage() {
     };
   }, []);
 
+  /* =========================================
+     تحميل البروفايل
+  ========================================= */
+
   async function loadProfile(currentUser) {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", currentUser.id)
-      .maybeSingle();
+    if (!currentUser?.id) return null;
 
-    if (error) {
-      console.error("Profile error:", error);
-      return;
-    }
-
-    if (data) {
-      setProfile(data);
-
-      await supabase
+    try {
+      const { data, error } = await supabase
         .from("profiles")
-        .update({
-          is_online: true,
-          last_seen: new Date().toISOString(),
-        })
-        .eq("id", currentUser.id);
+        .select("*")
+        .eq("id", currentUser.id)
+        .maybeSingle();
 
-      return;
-    }
+      if (error) {
+        console.error("Profile load error:", error);
+        return null;
+      }
 
-    const metadata = currentUser.user_metadata || {};
+      if (data) {
+        setProfile(data);
 
-    const newProfile = {
-      id: currentUser.id,
-      username:
-        metadata.username ||
+        await supabase
+          .from("profiles")
+          .update({
+            is_online: true,
+            last_seen: new Date().toISOString(),
+          })
+          .eq("id", currentUser.id);
+
+        return data;
+      }
+
+      /*
+       * إذا لم يوجد profile ننشئه.
+       */
+
+      const meta = currentUser.user_metadata || {};
+
+      const fallbackUsername =
+        meta.username ||
         currentUser.email?.split("@")[0] ||
-        `user_${currentUser.id.slice(0, 8)}`,
-      display_name:
-        metadata.display_name ||
-        metadata.username ||
-        currentUser.email?.split("@")[0] ||
-        "مستخدم جديد",
-      email: currentUser.email || null,
-      is_online: true,
-      last_seen: new Date().toISOString(),
-    };
+        `user_${currentUser.id.slice(0, 8)}`;
 
-    const { data: created, error: createError } = await supabase
-      .from("profiles")
-      .insert(newProfile)
-      .select()
-      .single();
+      const fallbackDisplayName =
+        meta.display_name ||
+        fallbackUsername;
 
-    if (createError) {
-      console.error("Create profile error:", createError);
-      return;
+      const newProfile = {
+        id: currentUser.id,
+        username: fallbackUsername,
+        display_name: fallbackDisplayName,
+        email: currentUser.email || null,
+        bio: "",
+        avatar_url: null,
+        cover_url: null,
+        is_online: true,
+        last_seen: new Date().toISOString(),
+      };
+
+      const { data: created, error: createError } = await supabase
+        .from("profiles")
+        .insert(newProfile)
+        .select()
+        .single();
+
+      if (createError) {
+        console.error("Profile create error:", createError);
+        return null;
+      }
+
+      setProfile(created);
+
+      return created;
+    } catch (error) {
+      console.error("Profile error:", error);
+      return null;
     }
-
-    setProfile(created);
   }
+
+  /* =========================================
+     تحميل المنشورات
+  ========================================= */
 
   async function loadPosts() {
-    const { data, error } = await supabase
-      .from("posts")
-      .select(`
-        id,
-        content,
-        image_url,
-        video_url,
-        created_at,
-        user_id,
-        profiles (
-          username,
-          display_name,
-          avatar_url
-        )
-      `)
-      .order("created_at", { ascending: false })
-      .limit(50);
+    try {
+      const { data, error } = await supabase
+        .from("posts")
+        .select(`
+          *,
+          profiles (
+            id,
+            username,
+            display_name,
+            avatar_url
+          )
+        `)
+        .order("created_at", {
+          ascending: false,
+        });
 
-    if (error) {
-      console.error("Posts error:", error);
-      return;
+      if (error) {
+        console.error("Posts error:", error);
+        setPosts([]);
+        return;
+      }
+
+      const realPosts = (data || []).map((post) => ({
+        ...post,
+        isDemo: false,
+      }));
+
+      setPosts(realPosts);
+    } catch (error) {
+      console.error("Load posts error:", error);
+      setPosts([]);
     }
-
-    if (!data) return;
-
-    const realPosts = data.map((post) => ({
-      id: post.id,
-      name: post.profiles?.display_name || "مستخدم",
-      username: `@${post.profiles?.username || "user"}`,
-      avatar:
-        post.profiles?.avatar_url ||
-        (post.profiles?.display_name || "م").charAt(0),
-      time: formatTime(post.created_at),
-      text: post.content || "",
-      image: post.image_url || null,
-      video: post.video_url || null,
-      likes: 0,
-      comments: 0,
-      real: true,
-    }));
-
-    setPosts([...realPosts, ...initialPosts]);
   }
+
+  /* =========================================
+     تسجيل الدخول / التسجيل
+  ========================================= */
 
   async function handleAuth(event) {
     event.preventDefault();
 
-    setAuthError("");
     setAuthMessage("");
+    setAuthSuccess(false);
 
-    if (!email.trim() || !password.trim()) {
-      setAuthError("اكتب البريد الإلكتروني وكلمة المرور.");
+    if (!email.trim()) {
+      setAuthMessage("اكتب البريد الإلكتروني.");
+      return;
+    }
+
+    if (!password.trim()) {
+      setAuthMessage("اكتب كلمة المرور.");
       return;
     }
 
     if (password.length < 6) {
-      setAuthError("كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
+      setAuthMessage(
+        "كلمة المرور يجب أن تكون 6 أحرف على الأقل."
+      );
       return;
     }
 
-    if (authMode === "register" && !username.trim()) {
-      setAuthError("اكتب اسم المستخدم.");
+    if (
+      authMode === "register" &&
+      !username.trim()
+    ) {
+      setAuthMessage("اكتب اسم المستخدم.");
       return;
     }
 
@@ -304,13 +403,15 @@ export default function HomePage() {
 
     try {
       if (authMode === "register") {
-        const cleanUsername = username.trim().toLowerCase();
+        /*
+         * التأكد من اسم المستخدم
+         */
 
         const { data: existingUsername, error: usernameError } =
           await supabase
             .from("profiles")
             .select("id")
-            .eq("username", cleanUsername)
+            .eq("username", username.trim())
             .maybeSingle();
 
         if (usernameError) {
@@ -318,66 +419,73 @@ export default function HomePage() {
         }
 
         if (existingUsername) {
-          setAuthError("اسم المستخدم مستخدم بالفعل.");
+          setAuthMessage(
+            "اسم المستخدم مستخدم بالفعل."
+          );
           setAuthLoading(false);
           return;
         }
 
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: {
-            data: {
-              username: cleanUsername,
-              display_name:
-                displayName.trim() || username.trim(),
+        /*
+         * إنشاء حساب Supabase
+         */
+
+        const { data, error } =
+          await supabase.auth.signUp({
+            email: email.trim(),
+            password,
+            options: {
+              data: {
+                username: username.trim(),
+                display_name:
+                  displayName.trim() ||
+                  username.trim(),
+              },
             },
-          },
-        });
+          });
 
         if (error) {
-          setAuthError(error.message);
+          setAuthMessage(error.message);
           setAuthLoading(false);
           return;
         }
 
-        if (data.user && data.session) {
-          const { data: createdProfile, error: profileError } =
-            await supabase
-              .from("profiles")
-              .insert({
-                id: data.user.id,
-                username: cleanUsername,
-                display_name:
-                  displayName.trim() || username.trim(),
-                email: data.user.email,
-                is_online: true,
-                last_seen: new Date().toISOString(),
-              })
-              .select()
-              .single();
+        /*
+         * إذا كان Supabase يحتاج تأكيد البريد
+         */
 
-          if (profileError) {
-            console.error(profileError);
-
-            if (!profileError.message.includes("duplicate")) {
-              setAuthError(
-                "تم إنشاء الحساب لكن حدث خطأ في إنشاء الملف الشخصي."
-              );
-            }
-          } else {
-            setProfile(createdProfile);
-          }
-
-          setUser(data.user);
-          setAuthMessage("تم إنشاء الحساب بنجاح 🎉");
-          await loadPosts();
-        } else {
+        if (data?.user && !data?.session) {
+          setAuthSuccess(true);
           setAuthMessage(
-            "تم إنشاء الحساب. تحقق من بريدك الإلكتروني لتأكيد الحساب ثم سجل الدخول."
+            "تم إنشاء الحساب. تحقق من بريدك الإلكتروني ثم سجل الدخول."
           );
+
+          setAuthLoading(false);
+          return;
+        }
+
+        /*
+         * إذا تم إنشاء session مباشرة
+         */
+
+        if (data?.user) {
+          setUser(data.user);
+
+          await loadProfile(data.user);
+          await loadPosts(data.user);
+
+          setAuthSuccess(true);
+          setAuthMessage("تم إنشاء الحساب بنجاح.");
+
+          setTimeout(() => {
+            setAuthMessage("");
+          }, 1500);
         }
       } else {
+        /*
+         * تسجيل الدخول
+         */
+
         const { data, error } =
           await supabase.auth.signInWithPassword({
             email: email.trim(),
@@ -385,9 +493,20 @@ export default function HomePage() {
           });
 
         if (error) {
-          setAuthError(
-            "بيانات تسجيل الدخول غير صحيحة أو الحساب غير مؤكد."
+          setAuthMessage(
+            error.message ||
+              "البريد الإلكتروني أو كلمة المرور غير صحيحة."
           );
+
+          setAuthLoading(false);
+          return;
+        }
+
+        if (!data?.user) {
+          setAuthMessage(
+            "لم يتم العثور على الحساب."
+          );
+
           setAuthLoading(false);
           return;
         }
@@ -395,63 +514,65 @@ export default function HomePage() {
         setUser(data.user);
 
         await loadProfile(data.user);
-        await loadPosts();
+        await loadPosts(data.user);
 
-        setAuthMessage("تم تسجيل الدخول بنجاح 👋");
+        setAuthSuccess(true);
+        setAuthMessage("تم تسجيل الدخول بنجاح.");
+
+        setTimeout(() => {
+          setAuthMessage("");
+        }, 1200);
       }
     } catch (error) {
       console.error(error);
-      setAuthError("حدث خطأ غير متوقع. حاول مرة أخرى.");
+
+      setAuthMessage(
+        error?.message ||
+          "حدث خطأ غير متوقع."
+      );
     }
 
     setAuthLoading(false);
   }
 
+  /* =========================================
+     تسجيل الخروج
+  ========================================= */
+
   async function logout() {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut({
+        scope: "local",
+      });
+    } catch (error) {
+      console.error(error);
+    }
 
     setUser(null);
     setProfile(null);
-    setShowMenu(false);
-    setAuthMessage("");
-    setAuthError("");
+    setPosts([]);
+    setLikedPosts({});
+    setComments({});
+    setCommentText({});
+    setMobileMenu(false);
+
+    /*
+     * إعادة تحميل الصفحة للتأكد من تنظيف الحالة.
+     */
+
+    window.location.href = "/";
   }
 
-  async function toggleLike(id) {
-    if (!user) return;
-
-    const alreadyLiked = likedPosts.includes(id);
-
-    if (alreadyLiked) {
-      setLikedPosts(
-        likedPosts.filter((postId) => postId !== id)
-      );
-
-      if (!String(id).startsWith("demo-")) {
-        await supabase
-          .from("likes")
-          .delete()
-          .eq("post_id", id)
-          .eq("user_id", user.id);
-      }
-    } else {
-      setLikedPosts([...likedPosts, id]);
-
-      if (!String(id).startsWith("demo-")) {
-        await supabase.from("likes").insert({
-          post_id: id,
-          user_id: user.id,
-        });
-      }
-    }
-  }
+  /* =========================================
+     إنشاء منشور
+  ========================================= */
 
   async function createPost() {
     if (!user) return;
 
-    if (!postText.trim()) return;
-
     const content = postText.trim();
+
+    if (!content) return;
 
     const { data, error } = await supabase
       .from("posts")
@@ -460,12 +581,9 @@ export default function HomePage() {
         content,
       })
       .select(`
-        id,
-        content,
-        image_url,
-        video_url,
-        created_at,
+        *,
         profiles (
+          id,
           username,
           display_name,
           avatar_url
@@ -475,66 +593,119 @@ export default function HomePage() {
 
     if (error) {
       console.error(error);
-      alert("حدث خطأ أثناء نشر المنشور.");
+      alert(
+        "تعذر إنشاء المنشور: " +
+          error.message
+      );
       return;
     }
 
-    const newPost = {
-      id: data.id,
-      name: data.profiles?.display_name || profile?.display_name || "أنت",
-      username: `@${
-        data.profiles?.username ||
-        profile?.username ||
-        "user"
-      }`,
-      avatar:
-        data.profiles?.avatar_url ||
-        profile?.display_name?.charAt(0) ||
-        "👤",
-      time: "الآن",
-      text: data.content,
-      image: data.image_url,
-      video: data.video_url,
-      likes: 0,
-      comments: 0,
-      real: true,
-    };
+    if (data) {
+      setPosts((current) => [
+        {
+          ...data,
+          isDemo: false,
+        },
+        ...current,
+      ]);
+    }
 
-    setPosts([newPost, ...posts]);
     setPostText("");
   }
 
-  async function addComment(postId) {
-    if (!user || !commentText.trim()) return;
+  /* =========================================
+     إعجاب
+  ========================================= */
 
-    if (String(postId).startsWith("demo-")) {
-      setComments({
-        ...comments,
-        [postId]: [
-          ...(comments[postId] || []),
+  async function toggleLike(post) {
+    if (!user || post.isDemo) {
+      setLikedPosts((current) => ({
+        ...current,
+        [post.id]: !current[post.id],
+      }));
+
+      return;
+    }
+
+    const isLiked = likedPosts[post.id];
+
+    if (isLiked) {
+      const { error } = await supabase
+        .from("likes")
+        .delete()
+        .eq("post_id", post.id)
+        .eq("user_id", user.id);
+
+      if (!error) {
+        setLikedPosts((current) => ({
+          ...current,
+          [post.id]: false,
+        }));
+      }
+    } else {
+      const { error } = await supabase
+        .from("likes")
+        .insert({
+          post_id: post.id,
+          user_id: user.id,
+        });
+
+      if (!error) {
+        setLikedPosts((current) => ({
+          ...current,
+          [post.id]: true,
+        }));
+      }
+    }
+  }
+
+  /* =========================================
+     تعليق
+  ========================================= */
+
+  async function addComment(post) {
+    if (!user) return;
+
+    const text = (
+      commentText[post.id] || ""
+    ).trim();
+
+    if (!text) return;
+
+    if (post.isDemo) {
+      setComments((current) => ({
+        ...current,
+        [post.id]: [
+          ...(current[post.id] || []),
           {
             id: Date.now(),
-            content: commentText.trim(),
-            name: profile?.display_name || "أنت",
+            content: text,
+            profile: {
+              display_name:
+                profile?.display_name ||
+                "أنت",
+            },
           },
         ],
-      });
+      }));
 
-      setCommentText("");
+      setCommentText((current) => ({
+        ...current,
+        [post.id]: "",
+      }));
+
       return;
     }
 
     const { data, error } = await supabase
       .from("comments")
       .insert({
-        post_id: postId,
+        post_id: post.id,
         user_id: user.id,
-        content: commentText.trim(),
+        content: text,
       })
       .select(`
-        id,
-        content,
-        created_at,
+        *,
         profiles (
           display_name,
           username,
@@ -545,156 +716,357 @@ export default function HomePage() {
 
     if (error) {
       console.error(error);
-      alert("حدث خطأ أثناء إضافة التعليق.");
       return;
     }
 
-    setComments({
-      ...comments,
-      [postId]: [
-        ...(comments[postId] || []),
-        {
-          id: data.id,
-          content: data.content,
-          name:
-            data.profiles?.display_name ||
-            profile?.display_name ||
-            "أنت",
-        },
-      ],
-    });
+    if (data) {
+      setComments((current) => ({
+        ...current,
+        [post.id]: [
+          ...(current[post.id] || []),
+          data,
+        ],
+      }));
+    }
 
-    setCommentText("");
+    setCommentText((current) => ({
+      ...current,
+      [post.id]: "",
+    }));
   }
 
+  /* =========================================
+     حذف منشور
+  ========================================= */
+
+  async function deletePost(post) {
+    if (!user || post.isDemo) return;
+
+    if (post.user_id !== user.id) {
+      return;
+    }
+
+    const ok = window.confirm(
+      "هل تريد حذف هذا المنشور؟"
+    );
+
+    if (!ok) return;
+
+    const { error } = await supabase
+      .from("posts")
+      .delete()
+      .eq("id", post.id)
+      .eq("user_id", user.id);
+
+    if (error) {
+      alert(
+        "تعذر حذف المنشور: " +
+          error.message
+      );
+      return;
+    }
+
+    setPosts((current) =>
+      current.filter(
+        (item) => item.id !== post.id
+      )
+    );
+
+    setOpenMenu(null);
+  }
+
+  /* =========================================
+     متابعة
+  ========================================= */
+
+  async function followUser(targetId) {
+    if (!user || !targetId) return;
+
+    if (targetId === user.id) return;
+
+    const { error } = await supabase
+      .from("follows")
+      .insert({
+        follower_id: user.id,
+        following_id: targetId,
+      });
+
+    if (
+      error &&
+      !error.message?.toLowerCase().includes("duplicate")
+    ) {
+      console.error(error);
+      return;
+    }
+
+    alert("تمت المتابعة.");
+  }
+
+  /* =========================================
+     فلترة المنشورات
+  ========================================= */
+
   const filteredPosts = posts.filter((post) => {
-    const query = search.toLowerCase();
+    if (!search.trim()) return true;
+
+    const query = search
+      .trim()
+      .toLowerCase();
+
+    const content =
+      post.content?.toLowerCase() || "";
+
+    const name =
+      post.profiles?.display_name?.toLowerCase() ||
+      "";
+
+    const username =
+      post.profiles?.username?.toLowerCase() ||
+      "";
 
     return (
-      post.text.toLowerCase().includes(query) ||
-      post.name.toLowerCase().includes(query) ||
-      post.username.toLowerCase().includes(query)
+      content.includes(query) ||
+      name.includes(query) ||
+      username.includes(query)
     );
   });
+
+  /* =========================================
+     الاسم والصورة
+  ========================================= */
+
+  const currentName =
+    profile?.display_name ||
+    profile?.username ||
+    user?.email?.split("@")[0] ||
+    "مستخدم";
+
+  const currentUsername =
+    profile?.username ||
+    user?.email?.split("@")[0] ||
+    "user";
+
+  /* =========================================
+     Loading
+  ========================================= */
 
   if (loading) {
     return (
       <div className="auth-loading">
-        <div className="loading-logo">M</div>
-        <h2>Mizo Social</h2>
-        <p>جاري تحميل المنصة...</p>
+        <div>
+          <div
+            className="auth-logo"
+            style={{
+              marginBottom: 20,
+            }}
+          >
+            M
+          </div>
+
+          <div>
+            جاري تحميل Mizo Social...
+          </div>
+        </div>
       </div>
     );
   }
 
+  /* =========================================
+     شاشة الدخول
+  ========================================= */
+
   if (!user) {
     return (
-      <div className="auth-screen">
-        <div className="auth-background"></div>
-
-        <div className="auth-box">
+      <main className="auth-screen">
+        <div className="auth-card">
           <div className="auth-logo">
-            <div className="auth-logo-icon">M</div>
-            <div>
-              <h1>Mizo Social</h1>
-              <p>منصتك الاجتماعية الجديدة</p>
-            </div>
+            M
           </div>
+
+          <h1 className="auth-title">
+            Mizo Social
+          </h1>
+
+          <p className="auth-subtitle">
+            منصتك الاجتماعية الجديدة
+            <br />
+            شارك، تواصل، واكتشف أشخاصًا جدد
+          </p>
 
           <div className="auth-tabs">
             <button
-              className={authMode === "login" ? "active" : ""}
+              type="button"
+              className={
+                authMode === "login"
+                  ? "active"
+                  : ""
+              }
               onClick={() => {
                 setAuthMode("login");
-                setAuthError("");
                 setAuthMessage("");
+                setAuthSuccess(false);
               }}
             >
               تسجيل الدخول
             </button>
 
             <button
-              className={authMode === "register" ? "active" : ""}
+              type="button"
+              className={
+                authMode === "register"
+                  ? "active"
+                  : ""
+              }
               onClick={() => {
                 setAuthMode("register");
-                setAuthError("");
                 setAuthMessage("");
+                setAuthSuccess(false);
               }}
             >
               إنشاء حساب
             </button>
           </div>
 
-          <form onSubmit={handleAuth} className="auth-form">
+          <form
+            className="auth-form"
+            onSubmit={handleAuth}
+          >
             {authMode === "register" && (
               <>
-                <div className="input-group">
-                  <User size={18} />
-                  <input
-                    type="text"
-                    placeholder="اسم المستخدم"
-                    value={username}
-                    onChange={(e) =>
-                      setUsername(e.target.value)
-                    }
-                  />
+                <div className="auth-field">
+                  <label>
+                    اسم المستخدم
+                  </label>
+
+                  <div
+                    style={{
+                      position: "relative",
+                    }}
+                  >
+                    <AtSign
+                      size={18}
+                      style={{
+                        position: "absolute",
+                        right: 15,
+                        top: 15,
+                        color: "#777",
+                      }}
+                    />
+
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) =>
+                        setUsername(
+                          e.target.value
+                        )
+                      }
+                      placeholder="mizo"
+                      style={{
+                        paddingRight: 45,
+                      }}
+                      autoComplete="username"
+                    />
+                  </div>
                 </div>
 
-                <div className="input-group">
-                  <User size={18} />
+                <div className="auth-field">
+                  <label>
+                    الاسم الظاهر
+                  </label>
+
                   <input
                     type="text"
-                    placeholder="اسم العرض"
                     value={displayName}
                     onChange={(e) =>
-                      setDisplayName(e.target.value)
+                      setDisplayName(
+                        e.target.value
+                      )
                     }
+                    placeholder="اسمك"
+                    autoComplete="name"
                   />
                 </div>
               </>
             )}
 
-            <div className="input-group">
-              <Mail size={18} />
-              <input
-                type="email"
-                placeholder="البريد الإلكتروني"
-                value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
-                autoComplete="email"
-              />
+            <div className="auth-field">
+              <label>
+                البريد الإلكتروني
+              </label>
+
+              <div
+                style={{
+                  position: "relative",
+                }}
+              >
+                <Mail
+                  size={18}
+                  style={{
+                    position: "absolute",
+                    right: 15,
+                    top: 15,
+                    color: "#777",
+                  }}
+                />
+
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) =>
+                    setEmail(e.target.value)
+                  }
+                  placeholder="example@email.com"
+                  style={{
+                    paddingRight: 45,
+                  }}
+                  autoComplete="email"
+                  required
+                />
+              </div>
             </div>
 
-            <div className="input-group">
-              <Lock size={18} />
-              <input
-                type="password"
-                placeholder="كلمة المرور"
-                value={password}
-                onChange={(e) =>
-                  setPassword(e.target.value)
-                }
-                autoComplete={
-                  authMode === "login"
-                    ? "current-password"
-                    : "new-password"
-                }
-              />
+            <div className="auth-field">
+              <label>
+                كلمة المرور
+              </label>
+
+              <div
+                style={{
+                  position: "relative",
+                }}
+              >
+                <Lock
+                  size={18}
+                  style={{
+                    position: "absolute",
+                    right: 15,
+                    top: 15,
+                    color: "#777",
+                  }}
+                />
+
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) =>
+                    setPassword(
+                      e.target.value
+                    )
+                  }
+                  placeholder="••••••••"
+                  style={{
+                    paddingRight: 45,
+                  }}
+                  autoComplete={
+                    authMode === "login"
+                      ? "current-password"
+                      : "new-password"
+                  }
+                  required
+                />
+              </div>
             </div>
-
-            {authError && (
-              <div className="auth-error">
-                {authError}
-              </div>
-            )}
-
-            {authMessage && (
-              <div className="auth-success">
-                {authMessage}
-              </div>
-            )}
 
             <button
               className="auth-submit"
@@ -702,244 +1074,238 @@ export default function HomePage() {
               disabled={authLoading}
             >
               {authLoading
-                ? "جاري التنفيذ..."
+                ? "جاري المعالجة..."
                 : authMode === "login"
-                ? "دخول إلى Mizo Social"
-                : "إنشاء حساب جديد"}
+                ? "تسجيل الدخول"
+                : "إنشاء الحساب"}
             </button>
           </form>
 
+          {authMessage && (
+            <div
+              className={
+                "auth-message " +
+                (authSuccess
+                  ? "auth-success"
+                  : "")
+              }
+            >
+              {authMessage}
+            </div>
+          )}
+
           <div className="auth-footer">
-            <span>✦</span>
-            مجتمع Mizo Social
-            <span>✦</span>
+            <ShieldCheck
+              size={14}
+              style={{
+                verticalAlign: "middle",
+                marginLeft: 5,
+              }}
+            />
+            حسابك محمي بواسطة Supabase
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 
+  /* =========================================
+     التطبيق بعد تسجيل الدخول
+  ========================================= */
+
   return (
     <div className="social-app">
-      {/* TOP BAR */}
+      {/* =====================================
+          الشريط العلوي
+      ===================================== */}
+
       <header className="topbar">
         <div className="logo">
-          <div className="logo-icon">M</div>
-          <span className="logo-text">Mizo Social</span>
+          <div className="logo-icon">
+            M
+          </div>
+
+          <span className="logo-text">
+            Mizo Social
+          </span>
         </div>
 
         <div className="search-box">
-          <Search className="search-icon" size={18} />
+          <Search
+            className="search-icon"
+            size={19}
+          />
 
           <input
-            type="text"
-            placeholder="ابحث عن أشخاص أو منشورات..."
             value={search}
             onChange={(e) =>
               setSearch(e.target.value)
             }
+            placeholder="ابحث عن منشور أو شخص..."
           />
         </div>
 
         <div className="top-actions">
           <button
             className="icon-button relative"
-            onClick={() => {
-              setShowNotifications(
-                !showNotifications
-              );
-              setShowMessages(false);
-            }}
+            title="الإشعارات"
           >
-            <Bell size={19} />
+            <Bell size={20} />
+
             <span className="notification-badge">
               3
             </span>
           </button>
 
           <button
-            className="icon-button relative"
-            onClick={() => {
-              setShowMessages(!showMessages);
-              setShowNotifications(false);
-            }}
-          >
-            <MessageCircle size={19} />
-            <span className="notification-badge">
-              5
-            </span>
-          </button>
-
-          <button
             className="icon-button hide-mobile"
-            onClick={() => setShowMenu(!showMenu)}
+            title="الرسائل"
           >
-            <Menu size={20} />
+            <MessageCircle size={20} />
           </button>
 
           <button
-            className="avatar avatar-button"
-            onClick={() => setShowMenu(!showMenu)}
+            className="icon-button"
+            onClick={() =>
+              setMobileMenu(!mobileMenu)
+            }
           >
-            {profile?.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt="avatar"
-              />
+            {mobileMenu ? (
+              <X size={20} />
             ) : (
-              (
-                profile?.display_name ||
-                profile?.username ||
-                "M"
-              ).charAt(0)
+              <Menu size={20} />
             )}
           </button>
         </div>
-
-        {showMenu && (
-          <div className="profile-menu">
-            <div className="profile-menu-user">
-              <div className="avatar">
-                {(
-                  profile?.display_name ||
-                  profile?.username ||
-                  "M"
-                ).charAt(0)}
-              </div>
-
-              <div>
-                <strong>
-                  {profile?.display_name ||
-                    profile?.username ||
-                    "مستخدم"}
-                </strong>
-
-                <small>
-                  @{profile?.username || "user"}
-                </small>
-              </div>
-            </div>
-
-            <button className="profile-menu-item">
-              <User size={18} />
-              الملف الشخصي
-            </button>
-
-            <button
-              className="profile-menu-item logout"
-              onClick={logout}
-            >
-              <LogOut size={18} />
-              تسجيل الخروج
-            </button>
-          </div>
-        )}
-
-        {showNotifications && (
-          <div className="dropdown-card notifications-dropdown">
-            <div className="dropdown-title">
-              الإشعارات
-            </div>
-
-            <p>❤️ أعجب Kanao بمنشورك</p>
-            <p>💬 أضاف Marin تعليقًا</p>
-            <p>👤 بدأ شخص جديد بمتابعتك</p>
-          </div>
-        )}
-
-        {showMessages && (
-          <div className="dropdown-card messages-dropdown">
-            <div className="dropdown-title">
-              الرسائل
-            </div>
-
-            <p>🌸 Kanao: مرحبًا!</p>
-            <p>💜 Marin: شاهدت منشورك</p>
-          </div>
-        )}
       </header>
 
-      {/* MAIN */}
+      {/* =====================================
+          التخطيط
+      ===================================== */}
+
       <main className="main-layout">
-        {/* LEFT SIDEBAR */}
+        {/* ===================================
+            الجانب الأيسر
+        =================================== */}
+
         <aside className="sidebar">
           <nav className="sidebar-menu">
-            <a className="menu-item active" href="#">
+            <a
+              href="#home"
+              className="menu-item active"
+            >
               <Home size={20} />
-              الرئيسية
+              <span>الرئيسية</span>
             </a>
 
-            <a className="menu-item" href="#">
-              <Compass size={20} />
-              استكشاف
+            <a
+              href="#discover"
+              className="menu-item"
+            >
+              <Sparkles size={20} />
+              <span>اكتشف</span>
             </a>
 
-            <a className="menu-item" href="#">
-              <Video size={20} />
-              الفيديوهات
-            </a>
-
-            <a className="menu-item" href="#">
+            <a
+              href="#messages"
+              className="menu-item"
+            >
               <MessageCircle size={20} />
-              الرسائل
+              <span>الرسائل</span>
             </a>
 
-            <a className="menu-item" href="#">
+            <a
+              href="#friends"
+              className="menu-item"
+            >
               <Users size={20} />
-              الأصدقاء
+              <span>الأصدقاء</span>
             </a>
 
-            <a className="menu-item" href="#">
-              <Bell size={20} />
-              الإشعارات
+            <a
+              href="#profile"
+              className="menu-item"
+            >
+              <User size={20} />
+              <span>الملف الشخصي</span>
             </a>
 
-            <a className="menu-item" href="#">
-              <UserPlus size={20} />
-              الأشخاص
-            </a>
+            <button
+              type="button"
+              className="menu-item"
+              onClick={logout}
+              style={{
+                border: 0,
+                background: "transparent",
+                width: "100%",
+                textAlign: "right",
+              }}
+            >
+              <LogOut size={20} />
+              <span>تسجيل الخروج</span>
+            </button>
           </nav>
 
           <div
             className="card side-card"
-            style={{ marginTop: "20px" }}
+            style={{
+              marginTop: 20,
+            }}
           >
             <div className="side-title">
-              Mizo Social
+              حسابك
             </div>
 
-            <p
-              style={{
-                color: "#777b87",
-                lineHeight: "1.7",
-                fontSize: "13px",
-              }}
-            >
-              منصتك الجديدة للتواصل ومشاركة الصور
-              والفيديوهات.
-            </p>
+            <div className="suggestion">
+              <div className="avatar">
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt=""
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  currentName
+                    .charAt(0)
+                    .toUpperCase()
+                )}
+              </div>
+
+              <div className="suggestion-info">
+                <div className="suggestion-name">
+                  {currentName}
+                </div>
+
+                <div className="suggestion-user">
+                  @{currentUsername}
+                </div>
+              </div>
+            </div>
           </div>
         </aside>
 
-        {/* FEED */}
+        {/* ===================================
+            المحتوى الرئيسي
+        =================================== */}
+
         <section className="feed">
-          {/* STORIES */}
+          {/* Stories */}
+
           <div className="stories">
-            {stories.map((story, index) => (
-              <div className="story" key={index}>
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "grid",
-                    placeItems: "center",
-                    fontSize: "42px",
-                    background:
-                      "linear-gradient(145deg,#161827,#30245c)",
-                  }}
-                >
-                  {story.emoji}
-                </div>
+            {demoStories.map((story) => (
+              <div
+                className="story"
+                key={story.id}
+              >
+                <img
+                  src={story.image}
+                  alt={story.name}
+                />
 
                 <div className="story-name">
                   {story.name}
@@ -948,152 +1314,345 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* CREATE POST */}
+          {/* إنشاء منشور */}
+
           <div className="card create-post">
             <div className="create-row">
               <div className="avatar">
-                {(
-                  profile?.display_name ||
-                  profile?.username ||
-                  "M"
-                ).charAt(0)}
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt=""
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  currentName
+                    .charAt(0)
+                    .toUpperCase()
+                )}
               </div>
 
               <textarea
                 value={postText}
                 onChange={(e) =>
-                  setPostText(e.target.value)
+                  setPostText(
+                    e.target.value
+                  )
                 }
-                placeholder="ماذا تريد أن تنشر اليوم؟"
+                placeholder={`بماذا تفكر يا ${currentName}؟`}
                 style={{
                   flex: 1,
-                  minHeight: "44px",
+                  minHeight: 70,
                   resize: "none",
-                  border: "none",
-                  outline: "none",
-                  borderRadius: "14px",
-                  padding: "12px 15px",
+                  border: "1px solid rgba(255,255,255,.08)",
+                  borderRadius: 14,
                   background: "#14161d",
                   color: "white",
+                  outline: "none",
+                  padding: 13,
                 }}
               />
             </div>
 
             <div className="post-tools">
-              <button className="post-tool">
-                <ImageIcon size={17} />
+              <button
+                className="post-tool"
+                type="button"
+                onClick={() =>
+                  alert(
+                    "رفع الصور سيتم تفعيله مع Supabase Storage."
+                  )
+                }
+              >
+                <ImageIcon
+                  size={17}
+                  style={{
+                    verticalAlign: "middle",
+                    marginLeft: 6,
+                  }}
+                />
                 صورة
               </button>
 
-              <button className="post-tool">
-                <Video size={17} />
+              <button
+                className="post-tool"
+                type="button"
+                onClick={() =>
+                  alert(
+                    "رفع الفيديو سيتم تفعيله مع Supabase Storage."
+                  )
+                }
+              >
+                <Video
+                  size={17}
+                  style={{
+                    verticalAlign: "middle",
+                    marginLeft: 6,
+                  }}
+                />
                 فيديو
               </button>
 
-              <button className="post-tool">
-                <Smile size={17} />
-                شعور
+              <button
+                className="post-tool"
+                type="button"
+                onClick={createPost}
+              >
+                <Send
+                  size={17}
+                  style={{
+                    verticalAlign: "middle",
+                    marginLeft: 6,
+                  }}
+                />
+                نشر
               </button>
             </div>
-
-            <button
-              onClick={createPost}
-              style={{
-                width: "100%",
-                marginTop: "10px",
-                height: "42px",
-                border: "none",
-                borderRadius: "12px",
-                background:
-                  "linear-gradient(135deg,#7c3aed,#2563eb)",
-                color: "white",
-                fontWeight: "bold",
-                cursor: "pointer",
-              }}
-            >
-              نشر
-            </button>
           </div>
 
-          {/* POSTS */}
+          {/* المنشورات */}
+
+          {filteredPosts.length === 0 && (
+            <div
+              className="card"
+              style={{
+                padding: 35,
+                textAlign: "center",
+                color: "#858894",
+              }}
+            >
+              لا توجد منشورات حاليًا.
+              <br />
+              كن أول شخص ينشر شيئًا!
+            </div>
+          )}
+
           {filteredPosts.map((post) => {
-            const liked = likedPosts.includes(post.id);
+            const postProfile =
+              post.profiles || {};
+
+            const postName =
+              postProfile.display_name ||
+              postProfile.username ||
+              "مستخدم";
+
+            const postUsername =
+              postProfile.username ||
+              "user";
+
+            const liked =
+              !!likedPosts[post.id];
+
+            const postComments =
+              comments[post.id] || [];
 
             return (
               <article
                 className="card post"
                 key={post.id}
               >
+                {/* Header */}
+
                 <div className="post-header">
                   <div className="user-info">
                     <div className="avatar">
-                      {post.avatar}
+                      {postProfile.avatar_url ? (
+                        <img
+                          src={
+                            postProfile.avatar_url
+                          }
+                          alt=""
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            borderRadius:
+                              "50%",
+                            objectFit:
+                              "cover",
+                          }}
+                        />
+                      ) : (
+                        postName
+                          .charAt(0)
+                          .toUpperCase()
+                      )}
                     </div>
 
                     <div>
                       <div className="user-name">
-                        {post.name}
+                        {postName}
                       </div>
 
                       <div className="post-time">
-                        {post.username} · {post.time}
+                        @{postUsername} ·{" "}
+                        {formatDate(
+                          post.created_at
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  <button className="post-menu">
-                    <MoreHorizontal size={21} />
-                  </button>
+                  <div
+                    className="relative"
+                    style={{
+                      position: "relative",
+                    }}
+                  >
+                    <button
+                      className="post-menu"
+                      onClick={() =>
+                        setOpenMenu(
+                          openMenu ===
+                            post.id
+                            ? null
+                            : post.id
+                        )
+                      }
+                    >
+                      <MoreHorizontal
+                        size={21}
+                      />
+                    </button>
+
+                    {openMenu ===
+                      post.id && (
+                      <div
+                        style={{
+                          position:
+                            "absolute",
+                          top: 30,
+                          left: 0,
+                          width: 150,
+                          padding: 7,
+                          borderRadius: 13,
+                          background:
+                            "#181a22",
+                          border:
+                            "1px solid rgba(255,255,255,.08)",
+                          boxShadow:
+                            "0 15px 40px rgba(0,0,0,.45)",
+                          zIndex: 20,
+                        }}
+                      >
+                        {post.user_id ===
+                          user?.id &&
+                          !post.isDemo && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                deletePost(
+                                  post
+                                )
+                              }
+                              style={{
+                                width:
+                                  "100%",
+                                border: 0,
+                                background:
+                                  "transparent",
+                                color:
+                                  "#f87171",
+                                padding: 10,
+                                textAlign:
+                                  "right",
+                                borderRadius: 9,
+                              }}
+                            >
+                              حذف المنشور
+                            </button>
+                          )}
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard?.writeText(
+                              window.location
+                                .href
+                            );
+                            setOpenMenu(
+                              null
+                            );
+                          }}
+                          style={{
+                            width: "100%",
+                            border: 0,
+                            background:
+                              "transparent",
+                            color:
+                              "#ddd",
+                            padding: 10,
+                            textAlign:
+                              "right",
+                            borderRadius: 9,
+                          }}
+                        >
+                          نسخ الرابط
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="post-content">
-                  {post.text}
-                </div>
+                {/* Content */}
 
-                {post.image && (
+                {post.content && (
+                  <div className="post-content">
+                    {post.content}
+                  </div>
+                )}
+
+                {/* Image */}
+
+                {post.image_url && (
                   <div className="post-media">
                     <img
-                      src={post.image}
-                      alt="post"
+                      src={post.image_url}
+                      alt=""
                     />
                   </div>
                 )}
 
-                {post.video && (
+                {/* Video */}
+
+                {post.video_url && (
                   <div className="post-media">
                     <video
+                      src={post.video_url}
                       controls
-                      preload="metadata"
-                    >
-                      <source
-                        src={post.video}
-                        type="video/mp4"
-                      />
-                      متصفحك لا يدعم تشغيل الفيديو.
-                    </video>
+                    />
                   </div>
                 )}
 
+                {/* Stats */}
+
                 <div className="post-stats">
                   <span>
-                    ❤️{" "}
-                    {post.likes +
-                      (liked ? 1 : 0)}
+                    {liked ? "❤️" : "♡"} إعجاب
                   </span>
 
                   <span>
-                    {(comments[post.id] || []).length ||
-                      post.comments} تعليق
+                    {postComments.length} تعليق
                   </span>
                 </div>
 
+                {/* Actions */}
+
                 <div className="post-actions">
                   <button
-                    className={`post-action ${
-                      liked ? "liked" : ""
-                    }`}
+                    className={
+                      "post-action " +
+                      (liked
+                        ? "liked"
+                        : "")
+                    }
+                    type="button"
                     onClick={() =>
-                      toggleLike(post.id)
+                      toggleLike(post)
                     }
                   >
                     <Heart
@@ -1103,117 +1662,218 @@ export default function HomePage() {
                           ? "currentColor"
                           : "none"
                       }
+                      style={{
+                        verticalAlign:
+                          "middle",
+                        marginLeft: 5,
+                      }}
                     />
+
                     إعجاب
                   </button>
 
                   <button
                     className="post-action"
-                    onClick={() =>
-                      setCommentsOpen(
-                        commentsOpen === post.id
-                          ? null
-                          : post.id
-                      )
-                    }
+                    type="button"
+                    onClick={() => {
+                      const element =
+                        document.getElementById(
+                          `comment-${post.id}`
+                        );
+
+                      element?.focus();
+                    }}
                   >
-                    <MessageSquare size={18} />
+                    <MessageSquare
+                      size={18}
+                      style={{
+                        verticalAlign:
+                          "middle",
+                        marginLeft: 5,
+                      }}
+                    />
+
                     تعليق
                   </button>
 
-                  <button className="post-action">
-                    <Share2 size={18} />
+                  <button
+                    className="post-action"
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(
+                        window.location.href
+                      );
+
+                      alert(
+                        "تم نسخ رابط الموقع."
+                      );
+                    }}
+                  >
+                    <Share2
+                      size={18}
+                      style={{
+                        verticalAlign:
+                          "middle",
+                        marginLeft: 5,
+                      }}
+                    />
+
                     مشاركة
                   </button>
                 </div>
 
-                {commentsOpen === post.id && (
-                  <div className="comments-area">
-                    {(comments[post.id] || []).map(
+                {/* Comments */}
+
+                {postComments.length > 0 && (
+                  <div
+                    style={{
+                      marginTop: 14,
+                      display: "flex",
+                      flexDirection:
+                        "column",
+                      gap: 8,
+                    }}
+                  >
+                    {postComments.map(
                       (comment) => (
                         <div
-                          className="comment"
                           key={comment.id}
+                          style={{
+                            padding: 10,
+                            borderRadius: 12,
+                            background:
+                              "#14161d",
+                          }}
                         >
-                          <div className="avatar">
-                            {comment.name.charAt(0)}
-                          </div>
+                          <strong
+                            style={{
+                              fontSize: 13,
+                            }}
+                          >
+                            {comment
+                              .profiles
+                              ?.display_name ||
+                              comment
+                                .profile
+                                ?.display_name ||
+                              "مستخدم"}
+                          </strong>
 
-                          <div className="comment-body">
-                            <strong>
-                              {comment.name}
-                            </strong>
-                            <p>
-                              {comment.content}
-                            </p>
+                          <div
+                            style={{
+                              marginTop: 4,
+                              color:
+                                "#bfc1c9",
+                              fontSize: 13,
+                            }}
+                          >
+                            {
+                              comment.content
+                            }
                           </div>
                         </div>
                       )
                     )}
-
-                    <div className="comment-input">
-                      <input
-                        type="text"
-                        placeholder="اكتب تعليقًا..."
-                        value={commentText}
-                        onChange={(e) =>
-                          setCommentText(
-                            e.target.value
-                          )
-                        }
-                        onKeyDown={(e) => {
-                          if (
-                            e.key === "Enter"
-                          ) {
-                            addComment(post.id);
-                          }
-                        }}
-                      />
-
-                      <button
-                        onClick={() =>
-                          addComment(post.id)
-                        }
-                      >
-                        إرسال
-                      </button>
-                    </div>
                   </div>
                 )}
+
+                {/* Comment input */}
+
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    marginTop: 12,
+                  }}
+                >
+                  <input
+                    id={`comment-${post.id}`}
+                    value={
+                      commentText[
+                        post.id
+                      ] || ""
+                    }
+                    onChange={(e) =>
+                      setCommentText(
+                        (current) => ({
+                          ...current,
+                          [post.id]:
+                            e.target.value,
+                        })
+                      )
+                    }
+                    onKeyDown={(e) => {
+                      if (
+                        e.key ===
+                        "Enter"
+                      ) {
+                        addComment(post);
+                      }
+                    }}
+                    placeholder="اكتب تعليقًا..."
+                    style={{
+                      flex: 1,
+                      height: 42,
+                      borderRadius: 12,
+                      border:
+                        "1px solid rgba(255,255,255,.08)",
+                      background:
+                        "#14161d",
+                      color: "white",
+                      padding:
+                        "0 13px",
+                      outline: "none",
+                    }}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      addComment(post)
+                    }
+                    style={{
+                      width: 45,
+                      border: 0,
+                      borderRadius: 12,
+                      background:
+                        "linear-gradient(135deg,#7c3aed,#2563eb)",
+                      color: "white",
+                    }}
+                  >
+                    <Send size={17} />
+                  </button>
+                </div>
               </article>
             );
           })}
-
-          {filteredPosts.length === 0 && (
-            <div
-              className="card"
-              style={{
-                padding: "40px",
-                textAlign: "center",
-                color: "#888",
-              }}
-            >
-              لا توجد نتائج للبحث.
-            </div>
-          )}
         </section>
 
-        {/* RIGHT SIDEBAR */}
+        {/* ===================================
+            الجانب الأيمن
+        =================================== */}
+
         <aside className="right-sidebar">
           <div className="card side-card">
             <div className="side-title">
-              اقتراحات لك
+              أشخاص قد تعرفهم
             </div>
 
-            {suggestedUsers.map(
-              (suggestion, index) => (
+            {demoSuggestions.map(
+              (suggestion) => (
                 <div
                   className="suggestion"
-                  key={index}
+                  key={suggestion.id}
                 >
-                  <div className="avatar">
-                    {suggestion.emoji}
-                  </div>
+                  <img
+                    src={suggestion.image}
+                    alt=""
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                  />
 
                   <div className="suggestion-info">
                     <div className="suggestion-name">
@@ -1221,11 +1881,26 @@ export default function HomePage() {
                     </div>
 
                     <div className="suggestion-user">
-                      {suggestion.username}
+                      @{suggestion.username}
                     </div>
                   </div>
 
-                  <button className="follow-button">
+                  <button
+                    className="follow-button"
+                    onClick={() =>
+                      alert(
+                        `تم إرسال طلب متابعة إلى ${suggestion.name}`
+                      )
+                    }
+                  >
+                    <UserPlus
+                      size={13}
+                      style={{
+                        verticalAlign:
+                          "middle",
+                        marginLeft: 3,
+                      }}
+                    />
                     متابعة
                   </button>
                 </div>
@@ -1235,106 +1910,284 @@ export default function HomePage() {
 
           <div className="card side-card">
             <div className="side-title">
-              متصل الآن
-            </div>
-
-            {[
-              "Kanao",
-              "Marin",
-              "Sasuke",
-              "Tanjiro",
-            ].map((name, index) => (
-              <div
-                className="suggestion"
-                key={index}
-              >
-                <div className="avatar">
-                  {["🌸", "💜", "⚡", "⚔️"][
-                    index
-                  ]}
-                </div>
-
-                <div className="suggestion-info">
-                  <div className="suggestion-name">
-                    {name}
-                  </div>
-                </div>
-
-                <span className="online-dot"></span>
-              </div>
-            ))}
-          </div>
-
-          <div className="card side-card">
-            <div className="side-title">
-              <Play
-                size={17}
-                style={{
-                  verticalAlign: "middle",
-                }}
-              />{" "}
-              فيديوهات
+              حالتك
             </div>
 
             <div
               style={{
-                height: "130px",
-                borderRadius: "14px",
-                background:
-                  "linear-gradient(135deg,#1e1b4b,#312e81,#111827)",
-                display: "grid",
-                placeItems: "center",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                color: "#bfc1c9",
+                fontSize: 13,
               }}
             >
-              <Play size={35} />
+              <span className="online-dot" />
+              أنت متصل الآن
+            </div>
+          </div>
+
+          <div className="card side-card">
+            <div className="side-title">
+              حسابك
             </div>
 
-            <p
+            <div
               style={{
-                marginTop: "10px",
-                color: "#aaa",
-                fontSize: "13px",
+                color: "#858894",
+                fontSize: 12,
+                lineHeight: 1.8,
               }}
             >
-              اكتشف أحدث الفيديوهات على Mizo
-              Social
-            </p>
+              <div>
+                الاسم:{" "}
+                <strong
+                  style={{
+                    color: "white",
+                  }}
+                >
+                  {currentName}
+                </strong>
+              </div>
+
+              <div>
+                المستخدم:{" "}
+                <strong
+                  style={{
+                    color: "white",
+                  }}
+                >
+                  @{currentUsername}
+                </strong>
+              </div>
+
+              <div>
+                البريد:{" "}
+                <strong
+                  style={{
+                    color: "white",
+                    wordBreak:
+                      "break-all",
+                  }}
+                >
+                  {user.email}
+                </strong>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={logout}
+              style={{
+                width: "100%",
+                height: 42,
+                marginTop: 15,
+                border: 0,
+                borderRadius: 12,
+                background:
+                  "rgba(239,68,68,.12)",
+                color: "#f87171",
+                fontWeight: 800,
+              }}
+            >
+              <LogOut
+                size={16}
+                style={{
+                  verticalAlign:
+                    "middle",
+                  marginLeft: 6,
+                }}
+              />
+              تسجيل الخروج
+            </button>
           </div>
         </aside>
       </main>
 
-      {/* MOBILE NAV */}
+      {/* =====================================
+          قائمة الموبايل
+      ===================================== */}
+
       <nav className="mobile-nav">
         <button className="active">
-          <Home size={20} />
-          <br />
-          الرئيسية
+          <Home size={19} />
+          <div>الرئيسية</div>
         </button>
 
         <button>
-          <Compass size={20} />
-          <br />
-          استكشاف
+          <Search size={19} />
+          <div>بحث</div>
         </button>
 
         <button>
-          <Video size={20} />
-          <br />
-          فيديو
+          <PlusIcon />
+          <div>نشر</div>
         </button>
 
         <button>
-          <MessageCircle size={20} />
-          <br />
-          رسائل
+          <Bell size={19} />
+          <div>التنبيهات</div>
         </button>
 
-        <button>
-          <Users size={20} />
-          <br />
-          أصدقاء
+        <button onClick={logout}>
+          <LogOut size={19} />
+          <div>خروج</div>
         </button>
       </nav>
+
+      {/* =====================================
+          Mobile menu
+      ===================================== */}
+
+      {mobileMenu && (
+        <div
+          style={{
+            position: "fixed",
+            top: 70,
+            left: 14,
+            zIndex: 500,
+            width: 230,
+            padding: 10,
+            borderRadius: 17,
+            background: "#14161d",
+            border:
+              "1px solid rgba(255,255,255,.08)",
+            boxShadow:
+              "0 20px 60px rgba(0,0,0,.5)",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() =>
+              setMobileMenu(false)
+            }
+            className="menu-item"
+            style={{
+              width: "100%",
+              border: 0,
+              background:
+                "transparent",
+            }}
+          >
+            <User size={19} />
+            الملف الشخصي
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              setMobileMenu(false)
+            }
+            className="menu-item"
+            style={{
+              width: "100%",
+              border: 0,
+              background:
+                "transparent",
+            }}
+          >
+            <Settings size={19} />
+            الإعدادات
+          </button>
+
+          <button
+            type="button"
+            onClick={logout}
+            className="menu-item"
+            style={{
+              width: "100%",
+              border: 0,
+              background:
+                "transparent",
+              color: "#f87171",
+            }}
+          >
+            <LogOut size={19} />
+            تسجيل الخروج
+          </button>
+        </div>
+      )}
     </div>
+  );
+}
+
+/* =========================================
+   التاريخ
+========================================= */
+
+function formatDate(date) {
+  if (!date) return "الآن";
+
+  const d = new Date(date);
+
+  if (Number.isNaN(d.getTime())) {
+    return "الآن";
+  }
+
+  const now = new Date();
+
+  const diff =
+    now.getTime() - d.getTime();
+
+  const minutes = Math.floor(
+    diff / 60000
+  );
+
+  if (minutes < 1) {
+    return "الآن";
+  }
+
+  if (minutes < 60) {
+    return `منذ ${minutes} دقيقة`;
+  }
+
+  const hours = Math.floor(
+    minutes / 60
+  );
+
+  if (hours < 24) {
+    return `منذ ${hours} ساعة`;
+  }
+
+  const days = Math.floor(
+    hours / 24
+  );
+
+  if (days < 7) {
+    return `منذ ${days} يوم`;
+  }
+
+  return d.toLocaleDateString(
+    "ar-EG",
+    {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }
+  );
+}
+
+/* =========================================
+   أيقونة +
+========================================= */
+
+function PlusIcon() {
+  return (
+    <span
+      style={{
+        display: "inline-grid",
+        placeItems: "center",
+        width: 21,
+        height: 21,
+        borderRadius: "50%",
+        background:
+          "linear-gradient(135deg,#7c3aed,#2563eb)",
+        color: "white",
+        fontWeight: 900,
+        fontSize: 17,
+      }}
+    >
+      +
+    </span>
   );
 }

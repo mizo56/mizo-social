@@ -1,40 +1,223 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Home,
-  Search,
-  Bell,
-  MessageCircle,
-  Users,
-  User,
-  Settings,
-  LogOut,
-  Heart,
-  MessageSquare,
-  Share2,
-  MoreHorizontal,
-  Image as ImageIcon,
-  Video,
-  Send,
-  UserPlus,
-  Check,
-  Menu,
-  X,
-  Lock,
-  Mail,
-  AtSign,
-  Camera,
-  Sparkles,
-  ShieldCheck,
-} from "lucide-react";
-
 import { createClient } from "../lib/supabase-browser";
 
 const supabase = createClient();
 
 /* =========================================
-   بيانات تجريبية للواجهة
+   SVG ICONS
+========================================= */
+
+function Icon({ name, size = 20, strokeWidth = 2 }) {
+  const common = {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    style: {
+      display: "inline-block",
+      verticalAlign: "middle",
+      flexShrink: 0,
+    },
+  };
+
+  const paths = {
+    home: (
+      <>
+        <path d="M3 10.5 12 3l9 7.5" />
+        <path d="M5 9.5V21h14V9.5" />
+        <path d="M9 21v-6h6v6" />
+      </>
+    ),
+
+    search: (
+      <>
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-4-4" />
+      </>
+    ),
+
+    bell: (
+      <>
+        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+        <path d="M10 21h4" />
+      </>
+    ),
+
+    message: (
+      <>
+        <path d="M21 11.5a8 8 0 0 1-8.5 8A9.5 9.5 0 0 1 8 18.5L3 20l1.5-4A8 8 0 0 1 3 11.5 8 8 0 0 1 11 4h2a8 8 0 0 1 8 7.5Z" />
+      </>
+    ),
+
+    users: (
+      <>
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </>
+    ),
+
+    user: (
+      <>
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 21a8 8 0 0 1 16 0" />
+      </>
+    ),
+
+    settings: (
+      <>
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.42 1.42-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-2v-.48a1.7 1.7 0 0 0-1.04-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06L9 17.94l.06-.06A1.7 1.7 0 0 0 9.4 16a1.7 1.7 0 0 0-1.56-1.04H7v-2h.84A1.7 1.7 0 0 0 9.4 12a1.7 1.7 0 0 0-.34-1.88L9 10.06l1.42-1.42.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 13.4 7.48V7h2v.48a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.42 1.42-.06.06A1.7 1.7 0 0 0 19.4 12a1.7 1.7 0 0 0 1.56 1.04H21v2h-.04A1.7 1.7 0 0 0 19.4 15Z" />
+      </>
+    ),
+
+    logout: (
+      <>
+        <path d="M10 17l5-5-5-5" />
+        <path d="M15 12H3" />
+        <path d="M21 3v18" />
+        <path d="M17 3h4v18h-4" />
+      </>
+    ),
+
+    heart: (
+      <path d="M20.8 8.8c0 5.5-8.8 10.2-8.8 10.2S3.2 14.3 3.2 8.8A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 8.8 2.7Z" />
+    ),
+
+    comment: (
+      <>
+        <path d="M21 11.5a8 8 0 0 1-8.5 8A9.5 9.5 0 0 1 8 18.5L3 20l1.5-4A8 8 0 0 1 3 11.5 8 8 0 0 1 11 4h2a8 8 0 0 1 8 7.5Z" />
+      </>
+    ),
+
+    share: (
+      <>
+        <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" />
+        <path d="m12 16 5-5" />
+        <path d="m12 16-5-5" />
+        <path d="M12 16V3" />
+      </>
+    ),
+
+    more: (
+      <>
+        <circle cx="5" cy="12" r="1" fill="currentColor" />
+        <circle cx="12" cy="12" r="1" fill="currentColor" />
+        <circle cx="19" cy="12" r="1" fill="currentColor" />
+      </>
+    ),
+
+    image: (
+      <>
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <circle cx="8.5" cy="9" r="1.5" />
+        <path d="m21 15-5-5L5 20" />
+      </>
+    ),
+
+    video: (
+      <>
+        <rect x="3" y="5" width="13" height="14" rx="2" />
+        <path d="m16 10 5-3v10l-5-3" />
+      </>
+    ),
+
+    send: (
+      <>
+        <path d="m22 2-7 20-4-9-9-4Z" />
+        <path d="M22 2 11 13" />
+      </>
+    ),
+
+    plus: (
+      <>
+        <path d="M12 5v14" />
+        <path d="M5 12h14" />
+      </>
+    ),
+
+    sparkles: (
+      <>
+        <path d="m12 3-1.5 5.5L5 10l5.5 1.5L12 17l1.5-5.5L19 10l-5.5-1.5Z" />
+        <path d="m19 16-.7 2.3L16 19l2.3.7L19 22l.7-2.3L22 19l-2.3-.7Z" />
+      </>
+    ),
+
+    at: (
+      <>
+        <circle cx="12" cy="12" r="4" />
+        <path d="M16 12v1a3 3 0 0 0 6 0v-1a10 10 0 1 0-3 7.5" />
+      </>
+    ),
+
+    mail: (
+      <>
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="m3 7 9 6 9-6" />
+      </>
+    ),
+
+    lock: (
+      <>
+        <rect x="5" y="10" width="14" height="10" rx="2" />
+        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+      </>
+    ),
+
+    shield: (
+      <>
+        <path d="M12 3 20 6v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6Z" />
+        <path d="m9 12 2 2 4-4" />
+      </>
+    ),
+
+    check: (
+      <>
+        <path d="m5 12 4 4L19 6" />
+      </>
+    ),
+
+    menu: (
+      <>
+        <path d="M4 6h16" />
+        <path d="M4 12h16" />
+        <path d="M4 18h16" />
+      </>
+    ),
+
+    close: (
+      <>
+        <path d="m6 6 12 12" />
+        <path d="m18 6-12 12" />
+      </>
+    ),
+
+    userPlus: (
+      <>
+        <circle cx="9" cy="8" r="4" />
+        <path d="M2 21a7 7 0 0 1 14 0" />
+        <path d="M19 8v6" />
+        <path d="M16 11h6" />
+      </>
+    ),
+  };
+
+  return (
+    <svg {...common} aria-hidden="true">
+      {paths[name] || paths.user}
+    </svg>
+  );
+}
+
+/* =========================================
+   بيانات تجريبية
 ========================================= */
 
 const demoStories = [
@@ -93,7 +276,7 @@ const demoSuggestions = [
 ];
 
 /* =========================================
-   الصفحة الرئيسية
+   الصفحة
 ========================================= */
 
 export default function HomePage() {
@@ -134,7 +317,7 @@ export default function HomePage() {
   const [mobileMenu, setMobileMenu] = useState(false);
 
   /* =========================================
-     فحص تسجيل الدخول
+     AUTH INITIALIZATION
   ========================================= */
 
   useEffect(() => {
@@ -142,19 +325,15 @@ export default function HomePage() {
 
     async function initializeAuth() {
       try {
-        /*
-         * إذا فتح المستخدم:
-         *
-         * /?logout=1
-         *
-         * سيتم حذف الجلسة وإظهار شاشة الدخول.
-         */
-
         if (typeof window !== "undefined") {
-          const params = new URLSearchParams(window.location.search);
+          const params = new URLSearchParams(
+            window.location.search
+          );
 
           if (params.get("logout") === "1") {
-            await supabase.auth.signOut({ scope: "local" });
+            await supabase.auth.signOut({
+              scope: "local",
+            });
 
             if (mounted) {
               setUser(null);
@@ -167,12 +346,10 @@ export default function HomePage() {
           }
         }
 
-        /*
-         * getUser يتحقق من المستخدم الحالي
-         * بدل الاعتماد فقط على البيانات المخزنة.
-         */
-
-        const { data, error } = await supabase.auth.getUser();
+        const {
+          data,
+          error,
+        } = await supabase.auth.getUser();
 
         if (!mounted) return;
 
@@ -186,13 +363,16 @@ export default function HomePage() {
         setUser(data.user);
 
         await loadProfile(data.user);
-        await loadPosts(data.user);
+        await loadPosts();
 
         if (mounted) {
           setLoading(false);
         }
       } catch (error) {
-        console.error("Auth initialization error:", error);
+        console.error(
+          "Auth initialization error:",
+          error
+        );
 
         if (mounted) {
           setUser(null);
@@ -204,40 +384,38 @@ export default function HomePage() {
 
     initializeAuth();
 
-    /*
-     * مراقبة تسجيل الدخول والخروج
-     */
-
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return;
+    } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
 
-      if (
-        event === "SIGNED_OUT" ||
-        !session?.user
-      ) {
-        setUser(null);
-        setProfile(null);
-        setPosts([]);
-        setLoading(false);
-        return;
+        if (
+          event === "SIGNED_OUT" ||
+          !session?.user
+        ) {
+          setUser(null);
+          setProfile(null);
+          setPosts([]);
+          setLoading(false);
+          return;
+        }
+
+        if (
+          event === "SIGNED_IN" ||
+          event === "TOKEN_REFRESHED" ||
+          event === "INITIAL_SESSION" ||
+          event === "USER_UPDATED"
+        ) {
+          setUser(session.user);
+
+          await loadProfile(session.user);
+          await loadPosts();
+
+          setLoading(false);
+        }
       }
-
-      if (
-        event === "SIGNED_IN" ||
-        event === "TOKEN_REFRESHED" ||
-        event === "INITIAL_SESSION" ||
-        event === "USER_UPDATED"
-      ) {
-        setUser(session.user);
-
-        await loadProfile(session.user);
-        await loadPosts(session.user);
-
-        setLoading(false);
-      }
-    });
+    );
 
     return () => {
       mounted = false;
@@ -246,43 +424,54 @@ export default function HomePage() {
   }, []);
 
   /* =========================================
-     تحميل البروفايل
+     LOAD PROFILE
   ========================================= */
 
   async function loadProfile(currentUser) {
     if (!currentUser?.id) return null;
 
     try {
-      const { data, error } = await supabase
+      const {
+        data,
+        error,
+      } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", currentUser.id)
         .maybeSingle();
 
       if (error) {
-        console.error("Profile load error:", error);
+        console.error(
+          "Profile load error:",
+          error
+        );
         return null;
       }
 
       if (data) {
         setProfile(data);
 
-        await supabase
-          .from("profiles")
-          .update({
-            is_online: true,
-            last_seen: new Date().toISOString(),
-          })
-          .eq("id", currentUser.id);
+        try {
+          await supabase
+            .from("profiles")
+            .update({
+              is_online: true,
+              last_seen:
+                new Date().toISOString(),
+            })
+            .eq("id", currentUser.id);
+        } catch (error) {
+          console.error(
+            "Online update error:",
+            error
+          );
+        }
 
         return data;
       }
 
-      /*
-       * إذا لم يوجد profile ننشئه.
-       */
-
-      const meta = currentUser.user_metadata || {};
+      const meta =
+        currentUser.user_metadata || {};
 
       const fallbackUsername =
         meta.username ||
@@ -302,17 +491,24 @@ export default function HomePage() {
         avatar_url: null,
         cover_url: null,
         is_online: true,
-        last_seen: new Date().toISOString(),
+        last_seen:
+          new Date().toISOString(),
       };
 
-      const { data: created, error: createError } = await supabase
+      const {
+        data: created,
+        error: createError,
+      } = await supabase
         .from("profiles")
         .insert(newProfile)
         .select()
         .single();
 
       if (createError) {
-        console.error("Profile create error:", createError);
+        console.error(
+          "Profile create error:",
+          createError
+        );
         return null;
       }
 
@@ -320,18 +516,25 @@ export default function HomePage() {
 
       return created;
     } catch (error) {
-      console.error("Profile error:", error);
+      console.error(
+        "Profile error:",
+        error
+      );
+
       return null;
     }
   }
 
   /* =========================================
-     تحميل المنشورات
+     LOAD POSTS
   ========================================= */
 
   async function loadPosts() {
     try {
-      const { data, error } = await supabase
+      const {
+        data,
+        error,
+      } = await supabase
         .from("posts")
         .select(`
           *,
@@ -347,25 +550,34 @@ export default function HomePage() {
         });
 
       if (error) {
-        console.error("Posts error:", error);
+        console.error(
+          "Posts error:",
+          error
+        );
+
         setPosts([]);
         return;
       }
 
-      const realPosts = (data || []).map((post) => ({
-        ...post,
-        isDemo: false,
-      }));
+      const realPosts =
+        (data || []).map((post) => ({
+          ...post,
+          isDemo: false,
+        }));
 
       setPosts(realPosts);
     } catch (error) {
-      console.error("Load posts error:", error);
+      console.error(
+        "Load posts error:",
+        error
+      );
+
       setPosts([]);
     }
   }
 
   /* =========================================
-     تسجيل الدخول / التسجيل
+     AUTH
   ========================================= */
 
   async function handleAuth(event) {
@@ -375,12 +587,16 @@ export default function HomePage() {
     setAuthSuccess(false);
 
     if (!email.trim()) {
-      setAuthMessage("اكتب البريد الإلكتروني.");
+      setAuthMessage(
+        "اكتب البريد الإلكتروني."
+      );
       return;
     }
 
     if (!password.trim()) {
-      setAuthMessage("اكتب كلمة المرور.");
+      setAuthMessage(
+        "اكتب كلمة المرور."
+      );
       return;
     }
 
@@ -395,7 +611,9 @@ export default function HomePage() {
       authMode === "register" &&
       !username.trim()
     ) {
-      setAuthMessage("اكتب اسم المستخدم.");
+      setAuthMessage(
+        "اكتب اسم المستخدم."
+      );
       return;
     }
 
@@ -403,59 +621,66 @@ export default function HomePage() {
 
     try {
       if (authMode === "register") {
-        /*
-         * التأكد من اسم المستخدم
-         */
-
-        const { data: existingUsername, error: usernameError } =
-          await supabase
-            .from("profiles")
-            .select("id")
-            .eq("username", username.trim())
-            .maybeSingle();
+        const {
+          data: existingUsername,
+          error: usernameError,
+        } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq(
+            "username",
+            username.trim()
+          )
+          .maybeSingle();
 
         if (usernameError) {
-          console.error(usernameError);
+          console.error(
+            usernameError
+          );
         }
 
         if (existingUsername) {
           setAuthMessage(
             "اسم المستخدم مستخدم بالفعل."
           );
+
           setAuthLoading(false);
           return;
         }
 
-        /*
-         * إنشاء حساب Supabase
-         */
+        const {
+          data,
+          error,
+        } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: {
+            data: {
+              username:
+                username.trim(),
 
-        const { data, error } =
-          await supabase.auth.signUp({
-            email: email.trim(),
-            password,
-            options: {
-              data: {
-                username: username.trim(),
-                display_name:
-                  displayName.trim() ||
-                  username.trim(),
-              },
+              display_name:
+                displayName.trim() ||
+                username.trim(),
             },
-          });
+          },
+        });
 
         if (error) {
-          setAuthMessage(error.message);
+          setAuthMessage(
+            error.message
+          );
+
           setAuthLoading(false);
           return;
         }
 
-        /*
-         * إذا كان Supabase يحتاج تأكيد البريد
-         */
-
-        if (data?.user && !data?.session) {
+        if (
+          data?.user &&
+          !data?.session
+        ) {
           setAuthSuccess(true);
+
           setAuthMessage(
             "تم إنشاء الحساب. تحقق من بريدك الإلكتروني ثم سجل الدخول."
           );
@@ -464,33 +689,30 @@ export default function HomePage() {
           return;
         }
 
-        /*
-         * إذا تم إنشاء session مباشرة
-         */
-
         if (data?.user) {
           setUser(data.user);
 
           await loadProfile(data.user);
-          await loadPosts(data.user);
+          await loadPosts();
 
           setAuthSuccess(true);
-          setAuthMessage("تم إنشاء الحساب بنجاح.");
+
+          setAuthMessage(
+            "تم إنشاء الحساب بنجاح."
+          );
 
           setTimeout(() => {
             setAuthMessage("");
           }, 1500);
         }
       } else {
-        /*
-         * تسجيل الدخول
-         */
-
-        const { data, error } =
-          await supabase.auth.signInWithPassword({
-            email: email.trim(),
-            password,
-          });
+        const {
+          data,
+          error,
+        } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
 
         if (error) {
           setAuthMessage(
@@ -514,10 +736,13 @@ export default function HomePage() {
         setUser(data.user);
 
         await loadProfile(data.user);
-        await loadPosts(data.user);
+        await loadPosts();
 
         setAuthSuccess(true);
-        setAuthMessage("تم تسجيل الدخول بنجاح.");
+
+        setAuthMessage(
+          "تم تسجيل الدخول بنجاح."
+        );
 
         setTimeout(() => {
           setAuthMessage("");
@@ -536,7 +761,7 @@ export default function HomePage() {
   }
 
   /* =========================================
-     تسجيل الخروج
+     LOGOUT
   ========================================= */
 
   async function logout() {
@@ -556,25 +781,29 @@ export default function HomePage() {
     setCommentText({});
     setMobileMenu(false);
 
-    /*
-     * إعادة تحميل الصفحة للتأكد من تنظيف الحالة.
-     */
-
-    window.location.href = "/";
+    if (
+      typeof window !== "undefined"
+    ) {
+      window.location.href = "/";
+    }
   }
 
   /* =========================================
-     إنشاء منشور
+     CREATE POST
   ========================================= */
 
   async function createPost() {
     if (!user) return;
 
-    const content = postText.trim();
+    const content =
+      postText.trim();
 
     if (!content) return;
 
-    const { data, error } = await supabase
+    const {
+      data,
+      error,
+    } = await supabase
       .from("posts")
       .insert({
         user_id: user.id,
@@ -593,10 +822,12 @@ export default function HomePage() {
 
     if (error) {
       console.error(error);
+
       alert(
         "تعذر إنشاء المنشور: " +
           error.message
       );
+
       return;
     }
 
@@ -614,36 +845,50 @@ export default function HomePage() {
   }
 
   /* =========================================
-     إعجاب
+     LIKE
   ========================================= */
 
   async function toggleLike(post) {
     if (!user || post.isDemo) {
       setLikedPosts((current) => ({
         ...current,
-        [post.id]: !current[post.id],
+        [post.id]:
+          !current[post.id],
       }));
 
       return;
     }
 
-    const isLiked = likedPosts[post.id];
+    const isLiked =
+      likedPosts[post.id];
 
     if (isLiked) {
-      const { error } = await supabase
+      const {
+        error,
+      } = await supabase
         .from("likes")
         .delete()
-        .eq("post_id", post.id)
-        .eq("user_id", user.id);
+        .eq(
+          "post_id",
+          post.id
+        )
+        .eq(
+          "user_id",
+          user.id
+        );
 
       if (!error) {
-        setLikedPosts((current) => ({
-          ...current,
-          [post.id]: false,
-        }));
+        setLikedPosts(
+          (current) => ({
+            ...current,
+            [post.id]: false,
+          })
+        );
       }
     } else {
-      const { error } = await supabase
+      const {
+        error,
+      } = await supabase
         .from("likes")
         .insert({
           post_id: post.id,
@@ -651,53 +896,64 @@ export default function HomePage() {
         });
 
       if (!error) {
-        setLikedPosts((current) => ({
-          ...current,
-          [post.id]: true,
-        }));
+        setLikedPosts(
+          (current) => ({
+            ...current,
+            [post.id]: true,
+          })
+        );
       }
     }
   }
 
   /* =========================================
-     تعليق
+     COMMENT
   ========================================= */
 
   async function addComment(post) {
     if (!user) return;
 
     const text = (
-      commentText[post.id] || ""
+      commentText[post.id] ||
+      ""
     ).trim();
 
     if (!text) return;
 
     if (post.isDemo) {
-      setComments((current) => ({
-        ...current,
-        [post.id]: [
-          ...(current[post.id] || []),
-          {
-            id: Date.now(),
-            content: text,
-            profile: {
-              display_name:
-                profile?.display_name ||
-                "أنت",
+      setComments(
+        (current) => ({
+          ...current,
+          [post.id]: [
+            ...(current[post.id] ||
+              []),
+            {
+              id: Date.now(),
+              content: text,
+              profile: {
+                display_name:
+                  profile?.display_name ||
+                  "أنت",
+              },
             },
-          },
-        ],
-      }));
+          ],
+        })
+      );
 
-      setCommentText((current) => ({
-        ...current,
-        [post.id]: "",
-      }));
+      setCommentText(
+        (current) => ({
+          ...current,
+          [post.id]: "",
+        })
+      );
 
       return;
     }
 
-    const { data, error } = await supabase
+    const {
+      data,
+      error,
+    } = await supabase
       .from("comments")
       .insert({
         post_id: post.id,
@@ -720,27 +976,34 @@ export default function HomePage() {
     }
 
     if (data) {
-      setComments((current) => ({
-        ...current,
-        [post.id]: [
-          ...(current[post.id] || []),
-          data,
-        ],
-      }));
+      setComments(
+        (current) => ({
+          ...current,
+          [post.id]: [
+            ...(current[post.id] ||
+              []),
+            data,
+          ],
+        })
+      );
     }
 
-    setCommentText((current) => ({
-      ...current,
-      [post.id]: "",
-    }));
+    setCommentText(
+      (current) => ({
+        ...current,
+        [post.id]: "",
+      })
+    );
   }
 
   /* =========================================
-     حذف منشور
+     DELETE POST
   ========================================= */
 
   async function deletePost(post) {
-    if (!user || post.isDemo) return;
+    if (!user || post.isDemo) {
+      return;
+    }
 
     if (post.user_id !== user.id) {
       return;
@@ -752,39 +1015,53 @@ export default function HomePage() {
 
     if (!ok) return;
 
-    const { error } = await supabase
+    const {
+      error,
+    } = await supabase
       .from("posts")
       .delete()
       .eq("id", post.id)
-      .eq("user_id", user.id);
+      .eq(
+        "user_id",
+        user.id
+      );
 
     if (error) {
       alert(
         "تعذر حذف المنشور: " +
           error.message
       );
+
       return;
     }
 
-    setPosts((current) =>
-      current.filter(
-        (item) => item.id !== post.id
-      )
+    setPosts(
+      (current) =>
+        current.filter(
+          (item) =>
+            item.id !== post.id
+        )
     );
 
     setOpenMenu(null);
   }
 
   /* =========================================
-     متابعة
+     FOLLOW
   ========================================= */
 
   async function followUser(targetId) {
-    if (!user || !targetId) return;
+    if (!user || !targetId) {
+      return;
+    }
 
-    if (targetId === user.id) return;
+    if (targetId === user.id) {
+      return;
+    }
 
-    const { error } = await supabase
+    const {
+      error,
+    } = await supabase
       .from("follows")
       .insert({
         follower_id: user.id,
@@ -793,7 +1070,9 @@ export default function HomePage() {
 
     if (
       error &&
-      !error.message?.toLowerCase().includes("duplicate")
+      !error.message
+        ?.toLowerCase()
+        .includes("duplicate")
     ) {
       console.error(error);
       return;
@@ -803,36 +1082,39 @@ export default function HomePage() {
   }
 
   /* =========================================
-     فلترة المنشورات
+     SEARCH
   ========================================= */
 
-  const filteredPosts = posts.filter((post) => {
-    if (!search.trim()) return true;
+  const filteredPosts =
+    posts.filter((post) => {
+      if (!search.trim()) {
+        return true;
+      }
 
-    const query = search
-      .trim()
-      .toLowerCase();
+      const query =
+        search.trim().toLowerCase();
 
-    const content =
-      post.content?.toLowerCase() || "";
+      const content =
+        post.content?.toLowerCase() ||
+        "";
 
-    const name =
-      post.profiles?.display_name?.toLowerCase() ||
-      "";
+      const name =
+        post.profiles?.display_name?.toLowerCase() ||
+        "";
 
-    const username =
-      post.profiles?.username?.toLowerCase() ||
-      "";
+      const username =
+        post.profiles?.username?.toLowerCase() ||
+        "";
 
-    return (
-      content.includes(query) ||
-      name.includes(query) ||
-      username.includes(query)
-    );
-  });
+      return (
+        content.includes(query) ||
+        name.includes(query) ||
+        username.includes(query)
+      );
+    });
 
   /* =========================================
-     الاسم والصورة
+     USER INFO
   ========================================= */
 
   const currentName =
@@ -847,7 +1129,7 @@ export default function HomePage() {
     "user";
 
   /* =========================================
-     Loading
+     LOADING
   ========================================= */
 
   if (loading) {
@@ -872,7 +1154,7 @@ export default function HomePage() {
   }
 
   /* =========================================
-     شاشة الدخول
+     AUTH SCREEN
   ========================================= */
 
   if (!user) {
@@ -940,17 +1222,14 @@ export default function HomePage() {
 
                   <div
                     style={{
-                      position: "relative",
+                      position:
+                        "relative",
                     }}
                   >
-                    <AtSign
+                    <Icon
+                      name="at"
                       size={18}
-                      style={{
-                        position: "absolute",
-                        right: 15,
-                        top: 15,
-                        color: "#777",
-                      }}
+                      strokeWidth={2}
                     />
 
                     <input
@@ -997,24 +1276,22 @@ export default function HomePage() {
 
               <div
                 style={{
-                  position: "relative",
+                  position:
+                    "relative",
                 }}
               >
-                <Mail
+                <Icon
+                  name="mail"
                   size={18}
-                  style={{
-                    position: "absolute",
-                    right: 15,
-                    top: 15,
-                    color: "#777",
-                  }}
                 />
 
                 <input
                   type="email"
                   value={email}
                   onChange={(e) =>
-                    setEmail(e.target.value)
+                    setEmail(
+                      e.target.value
+                    )
                   }
                   placeholder="example@email.com"
                   style={{
@@ -1033,17 +1310,13 @@ export default function HomePage() {
 
               <div
                 style={{
-                  position: "relative",
+                  position:
+                    "relative",
                 }}
               >
-                <Lock
+                <Icon
+                  name="lock"
                   size={18}
-                  style={{
-                    position: "absolute",
-                    right: 15,
-                    top: 15,
-                    color: "#777",
-                  }}
                 />
 
                 <input
@@ -1095,12 +1368,9 @@ export default function HomePage() {
           )}
 
           <div className="auth-footer">
-            <ShieldCheck
+            <Icon
+              name="shield"
               size={14}
-              style={{
-                verticalAlign: "middle",
-                marginLeft: 5,
-              }}
             />
             حسابك محمي بواسطة Supabase
           </div>
@@ -1110,13 +1380,14 @@ export default function HomePage() {
   }
 
   /* =========================================
-     التطبيق بعد تسجيل الدخول
+     MAIN APP
   ========================================= */
 
   return (
     <div className="social-app">
+
       {/* =====================================
-          الشريط العلوي
+          TOP BAR
       ===================================== */}
 
       <header className="topbar">
@@ -1131,15 +1402,17 @@ export default function HomePage() {
         </div>
 
         <div className="search-box">
-          <Search
-            className="search-icon"
+          <Icon
+            name="search"
             size={19}
           />
 
           <input
             value={search}
             onChange={(e) =>
-              setSearch(e.target.value)
+              setSearch(
+                e.target.value
+              )
             }
             placeholder="ابحث عن منشور أو شخص..."
           />
@@ -1149,8 +1422,12 @@ export default function HomePage() {
           <button
             className="icon-button relative"
             title="الإشعارات"
+            type="button"
           >
-            <Bell size={20} />
+            <Icon
+              name="bell"
+              size={20}
+            />
 
             <span className="notification-badge">
               3
@@ -1160,41 +1437,56 @@ export default function HomePage() {
           <button
             className="icon-button hide-mobile"
             title="الرسائل"
+            type="button"
           >
-            <MessageCircle size={20} />
+            <Icon
+              name="message"
+              size={20}
+            />
           </button>
 
           <button
             className="icon-button"
+            type="button"
             onClick={() =>
-              setMobileMenu(!mobileMenu)
+              setMobileMenu(
+                !mobileMenu
+              )
             }
           >
-            {mobileMenu ? (
-              <X size={20} />
-            ) : (
-              <Menu size={20} />
-            )}
+            <Icon
+              name={
+                mobileMenu
+                  ? "close"
+                  : "menu"
+              }
+              size={20}
+            />
           </button>
         </div>
       </header>
 
       {/* =====================================
-          التخطيط
+          MAIN LAYOUT
       ===================================== */}
 
       <main className="main-layout">
+
         {/* ===================================
-            الجانب الأيسر
+            LEFT SIDEBAR
         =================================== */}
 
         <aside className="sidebar">
           <nav className="sidebar-menu">
+
             <a
               href="#home"
               className="menu-item active"
             >
-              <Home size={20} />
+              <Icon
+                name="home"
+                size={20}
+              />
               <span>الرئيسية</span>
             </a>
 
@@ -1202,7 +1494,10 @@ export default function HomePage() {
               href="#discover"
               className="menu-item"
             >
-              <Sparkles size={20} />
+              <Icon
+                name="sparkles"
+                size={20}
+              />
               <span>اكتشف</span>
             </a>
 
@@ -1210,7 +1505,10 @@ export default function HomePage() {
               href="#messages"
               className="menu-item"
             >
-              <MessageCircle size={20} />
+              <Icon
+                name="message"
+                size={20}
+              />
               <span>الرسائل</span>
             </a>
 
@@ -1218,7 +1516,10 @@ export default function HomePage() {
               href="#friends"
               className="menu-item"
             >
-              <Users size={20} />
+              <Icon
+                name="users"
+                size={20}
+              />
               <span>الأصدقاء</span>
             </a>
 
@@ -1226,7 +1527,10 @@ export default function HomePage() {
               href="#profile"
               className="menu-item"
             >
-              <User size={20} />
+              <Icon
+                name="user"
+                size={20}
+              />
               <span>الملف الشخصي</span>
             </a>
 
@@ -1236,13 +1540,20 @@ export default function HomePage() {
               onClick={logout}
               style={{
                 border: 0,
-                background: "transparent",
+                background:
+                  "transparent",
                 width: "100%",
                 textAlign: "right",
               }}
             >
-              <LogOut size={20} />
-              <span>تسجيل الخروج</span>
+              <Icon
+                name="logout"
+                size={20}
+              />
+
+              <span>
+                تسجيل الخروج
+              </span>
             </button>
           </nav>
 
@@ -1260,13 +1571,17 @@ export default function HomePage() {
               <div className="avatar">
                 {profile?.avatar_url ? (
                   <img
-                    src={profile.avatar_url}
+                    src={
+                      profile.avatar_url
+                    }
                     alt=""
                     style={{
                       width: "100%",
                       height: "100%",
-                      borderRadius: "50%",
-                      objectFit: "cover",
+                      borderRadius:
+                        "50%",
+                      objectFit:
+                        "cover",
                     }}
                   />
                 ) : (
@@ -1290,44 +1605,52 @@ export default function HomePage() {
         </aside>
 
         {/* ===================================
-            المحتوى الرئيسي
+            FEED
         =================================== */}
 
         <section className="feed">
+
           {/* Stories */}
 
           <div className="stories">
-            {demoStories.map((story) => (
-              <div
-                className="story"
-                key={story.id}
-              >
-                <img
-                  src={story.image}
-                  alt={story.name}
-                />
+            {demoStories.map(
+              (story) => (
+                <div
+                  className="story"
+                  key={story.id}
+                >
+                  <img
+                    src={story.image}
+                    alt={story.name}
+                  />
 
-                <div className="story-name">
-                  {story.name}
+                  <div className="story-name">
+                    {story.name}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            )}
           </div>
 
-          {/* إنشاء منشور */}
+          {/* Create Post */}
 
           <div className="card create-post">
             <div className="create-row">
+
               <div className="avatar">
                 {profile?.avatar_url ? (
                   <img
-                    src={profile.avatar_url}
+                    src={
+                      profile.avatar_url
+                    }
                     alt=""
                     style={{
                       width: "100%",
                       height: "100%",
-                      borderRadius: "50%",
-                      objectFit: "cover",
+                      borderRadius:
+                        "50%",
+                      objectFit:
+                        "cover",
                     }}
                   />
                 ) : (
@@ -1349,9 +1672,11 @@ export default function HomePage() {
                   flex: 1,
                   minHeight: 70,
                   resize: "none",
-                  border: "1px solid rgba(255,255,255,.08)",
+                  border:
+                    "1px solid rgba(255,255,255,.08)",
                   borderRadius: 14,
-                  background: "#14161d",
+                  background:
+                    "#14161d",
                   color: "white",
                   outline: "none",
                   padding: 13,
@@ -1360,6 +1685,7 @@ export default function HomePage() {
             </div>
 
             <div className="post-tools">
+
               <button
                 className="post-tool"
                 type="button"
@@ -1369,12 +1695,9 @@ export default function HomePage() {
                   )
                 }
               >
-                <ImageIcon
+                <Icon
+                  name="image"
                   size={17}
-                  style={{
-                    verticalAlign: "middle",
-                    marginLeft: 6,
-                  }}
                 />
                 صورة
               </button>
@@ -1388,12 +1711,9 @@ export default function HomePage() {
                   )
                 }
               >
-                <Video
+                <Icon
+                  name="video"
                   size={17}
-                  style={{
-                    verticalAlign: "middle",
-                    marginLeft: 6,
-                  }}
                 />
                 فيديو
               </button>
@@ -1403,21 +1723,19 @@ export default function HomePage() {
                 type="button"
                 onClick={createPost}
               >
-                <Send
+                <Icon
+                  name="send"
                   size={17}
-                  style={{
-                    verticalAlign: "middle",
-                    marginLeft: 6,
-                  }}
                 />
                 نشر
               </button>
             </div>
           </div>
 
-          {/* المنشورات */}
+          {/* Empty */}
 
-          {filteredPosts.length === 0 && (
+          {filteredPosts.length ===
+            0 && (
             <div
               className="card"
               style={{
@@ -1432,428 +1750,473 @@ export default function HomePage() {
             </div>
           )}
 
-          {filteredPosts.map((post) => {
-            const postProfile =
-              post.profiles || {};
+          {/* Posts */}
 
-            const postName =
-              postProfile.display_name ||
-              postProfile.username ||
-              "مستخدم";
+          {filteredPosts.map(
+            (post) => {
+              const postProfile =
+                post.profiles || {};
 
-            const postUsername =
-              postProfile.username ||
-              "user";
+              const postName =
+                postProfile.display_name ||
+                postProfile.username ||
+                "مستخدم";
 
-            const liked =
-              !!likedPosts[post.id];
+              const postUsername =
+                postProfile.username ||
+                "user";
 
-            const postComments =
-              comments[post.id] || [];
+              const liked =
+                !!likedPosts[
+                  post.id
+                ];
 
-            return (
-              <article
-                className="card post"
-                key={post.id}
-              >
-                {/* Header */}
+              const postComments =
+                comments[
+                  post.id
+                ] || [];
 
-                <div className="post-header">
-                  <div className="user-info">
-                    <div className="avatar">
-                      {postProfile.avatar_url ? (
-                        <img
-                          src={
-                            postProfile.avatar_url
-                          }
-                          alt=""
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            borderRadius:
-                              "50%",
-                            objectFit:
-                              "cover",
-                          }}
-                        />
-                      ) : (
-                        postName
-                          .charAt(0)
-                          .toUpperCase()
-                      )}
-                    </div>
+              return (
+                <article
+                  className="card post"
+                  key={post.id}
+                >
 
-                    <div>
-                      <div className="user-name">
-                        {postName}
-                      </div>
+                  {/* Header */}
 
-                      <div className="post-time">
-                        @{postUsername} ·{" "}
-                        {formatDate(
-                          post.created_at
+                  <div className="post-header">
+
+                    <div className="user-info">
+
+                      <div className="avatar">
+                        {postProfile.avatar_url ? (
+                          <img
+                            src={
+                              postProfile.avatar_url
+                            }
+                            alt=""
+                            style={{
+                              width:
+                                "100%",
+                              height:
+                                "100%",
+                              borderRadius:
+                                "50%",
+                              objectFit:
+                                "cover",
+                            }}
+                          />
+                        ) : (
+                          postName
+                            .charAt(0)
+                            .toUpperCase()
                         )}
                       </div>
+
+                      <div>
+                        <div className="user-name">
+                          {postName}
+                        </div>
+
+                        <div className="post-time">
+                          @{postUsername} ·{" "}
+                          {formatDate(
+                            post.created_at
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      className="relative"
+                      style={{
+                        position:
+                          "relative",
+                      }}
+                    >
+                      <button
+                        className="post-menu"
+                        type="button"
+                        onClick={() =>
+                          setOpenMenu(
+                            openMenu ===
+                              post.id
+                              ? null
+                              : post.id
+                          )
+                        }
+                      >
+                        <Icon
+                          name="more"
+                          size={21}
+                        />
+                      </button>
+
+                      {openMenu ===
+                        post.id && (
+                        <div
+                          style={{
+                            position:
+                              "absolute",
+                            top: 30,
+                            left: 0,
+                            width: 150,
+                            padding: 7,
+                            borderRadius:
+                              13,
+                            background:
+                              "#181a22",
+                            border:
+                              "1px solid rgba(255,255,255,.08)",
+                            boxShadow:
+                              "0 15px 40px rgba(0,0,0,.45)",
+                            zIndex: 20,
+                          }}
+                        >
+
+                          {post.user_id ===
+                            user?.id &&
+                            !post.isDemo && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  deletePost(
+                                    post
+                                  )
+                                }
+                                style={{
+                                  width:
+                                    "100%",
+                                  border: 0,
+                                  background:
+                                    "transparent",
+                                  color:
+                                    "#f87171",
+                                  padding: 10,
+                                  textAlign:
+                                    "right",
+                                  borderRadius:
+                                    9,
+                                }}
+                              >
+                                حذف المنشور
+                              </button>
+                            )}
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard?.writeText(
+                                window
+                                  .location
+                                  .href
+                              );
+
+                              setOpenMenu(
+                                null
+                              );
+                            }}
+                            style={{
+                              width:
+                                "100%",
+                              border: 0,
+                              background:
+                                "transparent",
+                              color:
+                                "#ddd",
+                              padding: 10,
+                              textAlign:
+                                "right",
+                              borderRadius:
+                                9,
+                            }}
+                          >
+                            نسخ الرابط
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  <div
-                    className="relative"
-                    style={{
-                      position: "relative",
-                    }}
-                  >
+                  {/* Content */}
+
+                  {post.content && (
+                    <div className="post-content">
+                      {post.content}
+                    </div>
+                  )}
+
+                  {/* Image */}
+
+                  {post.image_url && (
+                    <div className="post-media">
+                      <img
+                        src={
+                          post.image_url
+                        }
+                        alt=""
+                      />
+                    </div>
+                  )}
+
+                  {/* Video */}
+
+                  {post.video_url && (
+                    <div className="post-media">
+                      <video
+                        src={
+                          post.video_url
+                        }
+                        controls
+                      />
+                    </div>
+                  )}
+
+                  {/* Stats */}
+
+                  <div className="post-stats">
+                    <span>
+                      {liked
+                        ? "❤️"
+                        : "♡"}{" "}
+                      إعجاب
+                    </span>
+
+                    <span>
+                      {
+                        postComments.length
+                      }{" "}
+                      تعليق
+                    </span>
+                  </div>
+
+                  {/* Actions */}
+
+                  <div className="post-actions">
+
                     <button
-                      className="post-menu"
+                      className={
+                        "post-action " +
+                        (liked
+                          ? "liked"
+                          : "")
+                      }
+                      type="button"
                       onClick={() =>
-                        setOpenMenu(
-                          openMenu ===
-                            post.id
-                            ? null
-                            : post.id
+                        toggleLike(
+                          post
                         )
                       }
                     >
-                      <MoreHorizontal
-                        size={21}
+                      <Icon
+                        name="heart"
+                        size={18}
+                        strokeWidth={2}
                       />
+
+                      إعجاب
                     </button>
 
-                    {openMenu ===
-                      post.id && (
-                      <div
-                        style={{
-                          position:
-                            "absolute",
-                          top: 30,
-                          left: 0,
-                          width: 150,
-                          padding: 7,
-                          borderRadius: 13,
-                          background:
-                            "#181a22",
-                          border:
-                            "1px solid rgba(255,255,255,.08)",
-                          boxShadow:
-                            "0 15px 40px rgba(0,0,0,.45)",
-                          zIndex: 20,
-                        }}
-                      >
-                        {post.user_id ===
-                          user?.id &&
-                          !post.isDemo && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                deletePost(
-                                  post
-                                )
-                              }
-                              style={{
-                                width:
-                                  "100%",
-                                border: 0,
-                                background:
-                                  "transparent",
-                                color:
-                                  "#f87171",
-                                padding: 10,
-                                textAlign:
-                                  "right",
-                                borderRadius: 9,
-                              }}
-                            >
-                              حذف المنشور
-                            </button>
-                          )}
+                    <button
+                      className="post-action"
+                      type="button"
+                      onClick={() => {
+                        const element =
+                          document.getElementById(
+                            `comment-${post.id}`
+                          );
 
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard?.writeText(
-                              window.location
-                                .href
-                            );
-                            setOpenMenu(
-                              null
-                            );
-                          }}
-                          style={{
-                            width: "100%",
-                            border: 0,
-                            background:
-                              "transparent",
-                            color:
-                              "#ddd",
-                            padding: 10,
-                            textAlign:
-                              "right",
-                            borderRadius: 9,
-                          }}
-                        >
-                          نسخ الرابط
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Content */}
-
-                {post.content && (
-                  <div className="post-content">
-                    {post.content}
-                  </div>
-                )}
-
-                {/* Image */}
-
-                {post.image_url && (
-                  <div className="post-media">
-                    <img
-                      src={post.image_url}
-                      alt=""
-                    />
-                  </div>
-                )}
-
-                {/* Video */}
-
-                {post.video_url && (
-                  <div className="post-media">
-                    <video
-                      src={post.video_url}
-                      controls
-                    />
-                  </div>
-                )}
-
-                {/* Stats */}
-
-                <div className="post-stats">
-                  <span>
-                    {liked ? "❤️" : "♡"} إعجاب
-                  </span>
-
-                  <span>
-                    {postComments.length} تعليق
-                  </span>
-                </div>
-
-                {/* Actions */}
-
-                <div className="post-actions">
-                  <button
-                    className={
-                      "post-action " +
-                      (liked
-                        ? "liked"
-                        : "")
-                    }
-                    type="button"
-                    onClick={() =>
-                      toggleLike(post)
-                    }
-                  >
-                    <Heart
-                      size={18}
-                      fill={
-                        liked
-                          ? "currentColor"
-                          : "none"
-                      }
-                      style={{
-                        verticalAlign:
-                          "middle",
-                        marginLeft: 5,
+                        element?.focus();
                       }}
-                    />
+                    >
+                      <Icon
+                        name="comment"
+                        size={18}
+                      />
 
-                    إعجاب
-                  </button>
+                      تعليق
+                    </button>
 
-                  <button
-                    className="post-action"
-                    type="button"
-                    onClick={() => {
-                      const element =
-                        document.getElementById(
-                          `comment-${post.id}`
+                    <button
+                      className="post-action"
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard?.writeText(
+                          window
+                            .location
+                            .href
                         );
 
-                      element?.focus();
-                    }}
-                  >
-                    <MessageSquare
-                      size={18}
-                      style={{
-                        verticalAlign:
-                          "middle",
-                        marginLeft: 5,
+                        alert(
+                          "تم نسخ رابط الموقع."
+                        );
                       }}
-                    />
+                    >
+                      <Icon
+                        name="share"
+                        size={18}
+                      />
 
-                    تعليق
-                  </button>
+                      مشاركة
+                    </button>
 
-                  <button
-                    className="post-action"
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard?.writeText(
-                        window.location.href
-                      );
+                  </div>
 
-                      alert(
-                        "تم نسخ رابط الموقع."
-                      );
-                    }}
-                  >
-                    <Share2
-                      size={18}
+                  {/* Comments */}
+
+                  {postComments.length >
+                    0 && (
+                    <div
                       style={{
-                        verticalAlign:
-                          "middle",
-                        marginLeft: 5,
+                        marginTop: 14,
+                        display:
+                          "flex",
+                        flexDirection:
+                          "column",
+                        gap: 8,
                       }}
-                    />
+                    >
+                      {postComments.map(
+                        (comment) => (
+                          <div
+                            key={
+                              comment.id
+                            }
+                            style={{
+                              padding: 10,
+                              borderRadius:
+                                12,
+                              background:
+                                "#14161d",
+                            }}
+                          >
+                            <strong
+                              style={{
+                                fontSize: 13,
+                              }}
+                            >
+                              {comment
+                                .profiles
+                                ?.display_name ||
+                                comment
+                                  .profile
+                                  ?.display_name ||
+                                "مستخدم"}
+                            </strong>
 
-                    مشاركة
-                  </button>
-                </div>
+                            <div
+                              style={{
+                                marginTop:
+                                  4,
+                                color:
+                                  "#bfc1c9",
+                                fontSize:
+                                  13,
+                              }}
+                            >
+                              {
+                                comment.content
+                              }
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )}
 
-                {/* Comments */}
+                  {/* Comment Input */}
 
-                {postComments.length > 0 && (
                   <div
                     style={{
-                      marginTop: 14,
-                      display: "flex",
-                      flexDirection:
-                        "column",
+                      display:
+                        "flex",
                       gap: 8,
+                      marginTop: 12,
                     }}
                   >
-                    {postComments.map(
-                      (comment) => (
-                        <div
-                          key={comment.id}
-                          style={{
-                            padding: 10,
-                            borderRadius: 12,
-                            background:
-                              "#14161d",
-                          }}
-                        >
-                          <strong
-                            style={{
-                              fontSize: 13,
-                            }}
-                          >
-                            {comment
-                              .profiles
-                              ?.display_name ||
-                              comment
-                                .profile
-                                ?.display_name ||
-                              "مستخدم"}
-                          </strong>
-
-                          <div
-                            style={{
-                              marginTop: 4,
-                              color:
-                                "#bfc1c9",
-                              fontSize: 13,
-                            }}
-                          >
-                            {
-                              comment.content
-                            }
-                          </div>
-                        </div>
-                      )
-                    )}
-                  </div>
-                )}
-
-                {/* Comment input */}
-
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 8,
-                    marginTop: 12,
-                  }}
-                >
-                  <input
-                    id={`comment-${post.id}`}
-                    value={
-                      commentText[
-                        post.id
-                      ] || ""
-                    }
-                    onChange={(e) =>
-                      setCommentText(
-                        (current) => ({
-                          ...current,
-                          [post.id]:
-                            e.target.value,
-                        })
-                      )
-                    }
-                    onKeyDown={(e) => {
-                      if (
-                        e.key ===
-                        "Enter"
-                      ) {
-                        addComment(post);
+                    <input
+                      id={`comment-${post.id}`}
+                      value={
+                        commentText[
+                          post.id
+                        ] || ""
                       }
-                    }}
-                    placeholder="اكتب تعليقًا..."
-                    style={{
-                      flex: 1,
-                      height: 42,
-                      borderRadius: 12,
-                      border:
-                        "1px solid rgba(255,255,255,.08)",
-                      background:
-                        "#14161d",
-                      color: "white",
-                      padding:
-                        "0 13px",
-                      outline: "none",
-                    }}
-                  />
+                      onChange={(e) =>
+                        setCommentText(
+                          (current) => ({
+                            ...current,
+                            [post.id]:
+                              e.target.value,
+                          })
+                        )
+                      }
+                      onKeyDown={(e) => {
+                        if (
+                          e.key ===
+                          "Enter"
+                        ) {
+                          addComment(
+                            post
+                          );
+                        }
+                      }}
+                      placeholder="اكتب تعليقًا..."
+                      style={{
+                        flex: 1,
+                        height: 42,
+                        borderRadius:
+                          12,
+                        border:
+                          "1px solid rgba(255,255,255,.08)",
+                        background:
+                          "#14161d",
+                        color:
+                          "white",
+                        padding:
+                          "0 13px",
+                        outline:
+                          "none",
+                      }}
+                    />
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      addComment(post)
-                    }
-                    style={{
-                      width: 45,
-                      border: 0,
-                      borderRadius: 12,
-                      background:
-                        "linear-gradient(135deg,#7c3aed,#2563eb)",
-                      color: "white",
-                    }}
-                  >
-                    <Send size={17} />
-                  </button>
-                </div>
-              </article>
-            );
-          })}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        addComment(
+                          post
+                        )
+                      }
+                      style={{
+                        width: 45,
+                        border: 0,
+                        borderRadius:
+                          12,
+                        background:
+                          "linear-gradient(135deg,#7c3aed,#2563eb)",
+                        color:
+                          "white",
+                      }}
+                    >
+                      <Icon
+                        name="send"
+                        size={17}
+                      />
+                    </button>
+                  </div>
+                </article>
+              );
+            }
+          )}
         </section>
 
         {/* ===================================
-            الجانب الأيمن
+            RIGHT SIDEBAR
         =================================== */}
 
         <aside className="right-sidebar">
+
           <div className="card side-card">
+
             <div className="side-title">
               أشخاص قد تعرفهم
             </div>
@@ -1864,61 +2227,76 @@ export default function HomePage() {
                   className="suggestion"
                   key={suggestion.id}
                 >
+
                   <img
-                    src={suggestion.image}
+                    src={
+                      suggestion.image
+                    }
                     alt=""
                     style={{
                       width: 42,
                       height: 42,
-                      borderRadius: "50%",
-                      objectFit: "cover",
+                      borderRadius:
+                        "50%",
+                      objectFit:
+                        "cover",
                     }}
                   />
 
                   <div className="suggestion-info">
+
                     <div className="suggestion-name">
-                      {suggestion.name}
+                      {
+                        suggestion.name
+                      }
                     </div>
 
                     <div className="suggestion-user">
-                      @{suggestion.username}
+                      @
+                      {
+                        suggestion.username
+                      }
                     </div>
+
                   </div>
 
                   <button
                     className="follow-button"
+                    type="button"
                     onClick={() =>
                       alert(
                         `تم إرسال طلب متابعة إلى ${suggestion.name}`
                       )
                     }
                   >
-                    <UserPlus
+                    <Icon
+                      name="userPlus"
                       size={13}
-                      style={{
-                        verticalAlign:
-                          "middle",
-                        marginLeft: 3,
-                      }}
                     />
+
                     متابعة
                   </button>
+
                 </div>
               )
             )}
           </div>
 
           <div className="card side-card">
+
             <div className="side-title">
               حالتك
             </div>
 
             <div
               style={{
-                display: "flex",
-                alignItems: "center",
+                display:
+                  "flex",
+                alignItems:
+                  "center",
                 gap: 8,
-                color: "#bfc1c9",
+                color:
+                  "#bfc1c9",
                 fontSize: 13,
               }}
             >
@@ -1928,22 +2306,27 @@ export default function HomePage() {
           </div>
 
           <div className="card side-card">
+
             <div className="side-title">
               حسابك
             </div>
 
             <div
               style={{
-                color: "#858894",
+                color:
+                  "#858894",
                 fontSize: 12,
-                lineHeight: 1.8,
+                lineHeight:
+                  1.8,
               }}
             >
+
               <div>
                 الاسم:{" "}
                 <strong
                   style={{
-                    color: "white",
+                    color:
+                      "white",
                   }}
                 >
                   {currentName}
@@ -1954,7 +2337,8 @@ export default function HomePage() {
                 المستخدم:{" "}
                 <strong
                   style={{
-                    color: "white",
+                    color:
+                      "white",
                   }}
                 >
                   @{currentUsername}
@@ -1965,7 +2349,8 @@ export default function HomePage() {
                 البريد:{" "}
                 <strong
                   style={{
-                    color: "white",
+                    color:
+                      "white",
                     wordBreak:
                       "break-all",
                   }}
@@ -1973,31 +2358,33 @@ export default function HomePage() {
                   {user.email}
                 </strong>
               </div>
+
             </div>
 
             <button
               type="button"
               onClick={logout}
               style={{
-                width: "100%",
+                width:
+                  "100%",
                 height: 42,
                 marginTop: 15,
                 border: 0,
-                borderRadius: 12,
+                borderRadius:
+                  12,
                 background:
                   "rgba(239,68,68,.12)",
-                color: "#f87171",
-                fontWeight: 800,
+                color:
+                  "#f87171",
+                fontWeight:
+                  800,
               }}
             >
-              <LogOut
+              <Icon
+                name="logout"
                 size={16}
-                style={{
-                  verticalAlign:
-                    "middle",
-                  marginLeft: 6,
-                }}
               />
+
               تسجيل الخروج
             </button>
           </div>
@@ -2005,57 +2392,107 @@ export default function HomePage() {
       </main>
 
       {/* =====================================
-          قائمة الموبايل
+          MOBILE NAV
       ===================================== */}
 
       <nav className="mobile-nav">
-        <button className="active">
-          <Home size={19} />
+
+        <button
+          className="active"
+          type="button"
+        >
+          <Icon
+            name="home"
+            size={19}
+          />
           <div>الرئيسية</div>
         </button>
 
-        <button>
-          <Search size={19} />
+        <button
+          type="button"
+          onClick={() => {
+            const input =
+              document.querySelector(
+                ".search-box input"
+              );
+
+            input?.focus();
+          }}
+        >
+          <Icon
+            name="search"
+            size={19}
+          />
           <div>بحث</div>
         </button>
 
-        <button>
+        <button
+          type="button"
+          onClick={() => {
+            const textarea =
+              document.querySelector(
+                ".create-post textarea"
+              );
+
+            textarea?.focus();
+          }}
+        >
           <PlusIcon />
           <div>نشر</div>
         </button>
 
-        <button>
-          <Bell size={19} />
+        <button
+          type="button"
+          onClick={() =>
+            alert(
+              "لا توجد إشعارات جديدة."
+            )
+          }
+        >
+          <Icon
+            name="bell"
+            size={19}
+          />
           <div>التنبيهات</div>
         </button>
 
-        <button onClick={logout}>
-          <LogOut size={19} />
+        <button
+          type="button"
+          onClick={logout}
+        >
+          <Icon
+            name="logout"
+            size={19}
+          />
           <div>خروج</div>
         </button>
       </nav>
 
       {/* =====================================
-          Mobile menu
+          MOBILE MENU
       ===================================== */}
 
       {mobileMenu && (
         <div
           style={{
-            position: "fixed",
+            position:
+              "fixed",
             top: 70,
             left: 14,
             zIndex: 500,
             width: 230,
             padding: 10,
-            borderRadius: 17,
-            background: "#14161d",
+            borderRadius:
+              17,
+            background:
+              "#14161d",
             border:
               "1px solid rgba(255,255,255,.08)",
             boxShadow:
               "0 20px 60px rgba(0,0,0,.5)",
           }}
         >
+
           <button
             type="button"
             onClick={() =>
@@ -2063,13 +2500,18 @@ export default function HomePage() {
             }
             className="menu-item"
             style={{
-              width: "100%",
+              width:
+                "100%",
               border: 0,
               background:
                 "transparent",
             }}
           >
-            <User size={19} />
+            <Icon
+              name="user"
+              size={19}
+            />
+
             الملف الشخصي
           </button>
 
@@ -2080,13 +2522,18 @@ export default function HomePage() {
             }
             className="menu-item"
             style={{
-              width: "100%",
+              width:
+                "100%",
               border: 0,
               background:
                 "transparent",
             }}
           >
-            <Settings size={19} />
+            <Icon
+              name="settings"
+              size={19}
+            />
+
             الإعدادات
           </button>
 
@@ -2095,16 +2542,23 @@ export default function HomePage() {
             onClick={logout}
             className="menu-item"
             style={{
-              width: "100%",
+              width:
+                "100%",
               border: 0,
               background:
                 "transparent",
-              color: "#f87171",
+              color:
+                "#f87171",
             }}
           >
-            <LogOut size={19} />
+            <Icon
+              name="logout"
+              size={19}
+            />
+
             تسجيل الخروج
           </button>
+
         </div>
       )}
     </div>
@@ -2112,26 +2566,36 @@ export default function HomePage() {
 }
 
 /* =========================================
-   التاريخ
+   DATE FORMAT
 ========================================= */
 
 function formatDate(date) {
-  if (!date) return "الآن";
-
-  const d = new Date(date);
-
-  if (Number.isNaN(d.getTime())) {
+  if (!date) {
     return "الآن";
   }
 
-  const now = new Date();
+  const d =
+    new Date(date);
+
+  if (
+    Number.isNaN(
+      d.getTime()
+    )
+  ) {
+    return "الآن";
+  }
+
+  const now =
+    new Date();
 
   const diff =
-    now.getTime() - d.getTime();
+    now.getTime() -
+    d.getTime();
 
-  const minutes = Math.floor(
-    diff / 60000
-  );
+  const minutes =
+    Math.floor(
+      diff / 60000
+    );
 
   if (minutes < 1) {
     return "الآن";
@@ -2141,17 +2605,19 @@ function formatDate(date) {
     return `منذ ${minutes} دقيقة`;
   }
 
-  const hours = Math.floor(
-    minutes / 60
-  );
+  const hours =
+    Math.floor(
+      minutes / 60
+    );
 
   if (hours < 24) {
     return `منذ ${hours} ساعة`;
   }
 
-  const days = Math.floor(
-    hours / 24
-  );
+  const days =
+    Math.floor(
+      hours / 24
+    );
 
   if (days < 7) {
     return `منذ ${days} يوم`;
@@ -2168,23 +2634,29 @@ function formatDate(date) {
 }
 
 /* =========================================
-   أيقونة +
+   PLUS ICON
 ========================================= */
 
 function PlusIcon() {
   return (
     <span
       style={{
-        display: "inline-grid",
-        placeItems: "center",
+        display:
+          "inline-grid",
+        placeItems:
+          "center",
         width: 21,
         height: 21,
-        borderRadius: "50%",
+        borderRadius:
+          "50%",
         background:
           "linear-gradient(135deg,#7c3aed,#2563eb)",
-        color: "white",
-        fontWeight: 900,
+        color:
+          "white",
+        fontWeight:
+          900,
         fontSize: 17,
+        lineHeight: 1,
       }}
     >
       +
